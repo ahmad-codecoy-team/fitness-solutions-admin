@@ -1,60 +1,67 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import { Helmet } from "react-helmet-async";
-import { format } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Icon } from "@/components/icon";
+import { mockTrainees, mockTrainers } from "@/mocks/users";
+// import { type PaymentRecord, type Trainee, type Trainer, mockTrainees, mockTrainers } from "@/mocks/users";
+import { Avatar } from "@/ui/avatar";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
-import { Avatar } from "@/ui/avatar";
-import { Icon } from "@/components/icon";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
-import { mockTrainers, mockTrainees, type Trainer, type Trainee, type PaymentRecord } from "@/mocks/users";
+import { format } from "date-fns";
+import { Helmet } from "react-helmet-async";
+import { useNavigate, useParams } from "react-router";
 
 export default function TrainerDetails() {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
-	
+
 	// Find trainer by ID
-	const trainer = mockTrainers.find(t => t.id === id);
-	
+	const trainer = mockTrainers.find((t) => t.id === id);
+
 	// Get trainees under this trainer
-	const trainerTrainees = mockTrainees.filter(t => t.trainerId === id);
-	
+	const trainerTrainees = mockTrainees.filter((t) => t.trainerId === id);
+
 	if (!trainer) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
 				<h2 className="text-2xl font-semibold">Trainer Not Found</h2>
-				<Button onClick={() => navigate('/users')}>
-					Back to Users
-				</Button>
+				<Button onClick={() => navigate("/users")}>Back to Users</Button>
 			</div>
 		);
 	}
 
 	const handleToggleStatus = () => {
-		console.log('Toggle trainer status:', trainer.id);
+		console.log("Toggle trainer status:", trainer.id);
 		// API call to suspend/activate trainer
 	};
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case 'active': return 'default';
-			case 'suspended': return 'destructive';
-			case 'inactive': return 'secondary';
-			default: return 'secondary';
+			case "active":
+				return "default";
+			case "suspended":
+				return "destructive";
+			case "inactive":
+				return "secondary";
+			default:
+				return "secondary";
 		}
 	};
 
-	const getPaymentStatusColor = (status: string) => {
-		switch (status) {
-			case 'completed': return 'default';
-			case 'pending': return 'secondary';
-			case 'failed': return 'destructive';
-			case 'refunded': return 'outline';
-			default: return 'secondary';
-		}
-	};
+	// const getPaymentStatusColor = (status: string) => {
+	// 	switch (status) {
+	// 		case "completed":
+	// 			return "default";
+	// 		case "pending":
+	// 			return "secondary";
+	// 		case "failed":
+	// 			return "destructive";
+	// 		case "refunded":
+	// 			return "outline";
+	// 		default:
+	// 			return "secondary";
+	// 	}
+	// };
 
 	return (
 		<div className="flex flex-col gap-6 p-6">
@@ -64,11 +71,7 @@ export default function TrainerDetails() {
 
 			{/* Header */}
 			<div className="flex items-center gap-4">
-				<Button 
-					variant="ghost" 
-					size="sm"
-					onClick={() => navigate('/users')}
-				>
+				<Button variant="ghost" size="sm" onClick={() => navigate("/users")}>
 					<Icon icon="solar:arrow-left-bold-duotone" className="h-4 w-4 mr-1" />
 					Back to Users
 				</Button>
@@ -79,13 +82,13 @@ export default function TrainerDetails() {
 				<CardContent className="p-6">
 					<div className="flex items-start gap-6">
 						<Avatar className="h-20 w-20">
-							<img 
-								src={trainer.avatar || "/src/assets/images/avatars/avatar-1.png"} 
+							<img
+								src={trainer.avatar || "/src/assets/images/avatars/avatar-1.png"}
 								alt={trainer.name}
 								className="object-cover"
 							/>
 						</Avatar>
-						
+
 						<div className="flex-1">
 							<div className="flex items-start justify-between">
 								<div>
@@ -94,24 +97,22 @@ export default function TrainerDetails() {
 									<p className="text-muted-foreground">{trainer.phone}</p>
 									<p className="text-muted-foreground">{trainer.signupDetails.location}</p>
 								</div>
-								
+
 								<div className="flex items-center gap-2">
-									<Badge variant={getStatusColor(trainer.status) as any}>
-										{trainer.status}
-									</Badge>
-									<Button 
-										variant={trainer.status === 'suspended' ? 'default' : 'destructive'}
+									<Badge variant={getStatusColor(trainer.status) as any}>{trainer.status}</Badge>
+									<Button
+										variant={trainer.status === "suspended" ? "default" : "destructive"}
 										onClick={handleToggleStatus}
 									>
-										<Icon 
-											icon={trainer.status === 'suspended' ? "solar:play-bold-duotone" : "solar:pause-bold-duotone"} 
-											className="h-4 w-4 mr-1" 
+										<Icon
+											icon={trainer.status === "suspended" ? "solar:play-bold-duotone" : "solar:pause-bold-duotone"}
+											className="h-4 w-4 mr-1"
 										/>
-										{trainer.status === 'suspended' ? 'Activate' : 'Suspend'}
+										{trainer.status === "suspended" ? "Activate" : "Suspend"}
 									</Button>
 								</div>
 							</div>
-							
+
 							<div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
 								<div>
 									<p className="text-sm text-muted-foreground">Trainees</p>
@@ -127,7 +128,7 @@ export default function TrainerDetails() {
 								</div>
 								<div>
 									<p className="text-sm text-muted-foreground">Joined</p>
-									<p className="text-lg font-semibold">{format(new Date(trainer.createdAt), 'MMM dd, yyyy')}</p>
+									<p className="text-lg font-semibold">{format(new Date(trainer.createdAt), "MMM dd, yyyy")}</p>
 								</div>
 							</div>
 						</div>
@@ -137,10 +138,10 @@ export default function TrainerDetails() {
 
 			{/* Tabs Section */}
 			<Tabs defaultValue="profile" className="w-full">
-				<TabsList className="grid w-full max-w-2xl grid-cols-4">
+				<TabsList className="grid w-full max-w-lg grid-cols-4">
 					<TabsTrigger value="profile">Profile</TabsTrigger>
 					<TabsTrigger value="subscription">Subscription</TabsTrigger>
-					<TabsTrigger value="payments">Payments</TabsTrigger>
+					{/* <TabsTrigger value="payments">Payments</TabsTrigger> */}
 					<TabsTrigger value="trainees">Trainees</TabsTrigger>
 				</TabsList>
 
@@ -153,45 +154,51 @@ export default function TrainerDetails() {
 						<CardContent className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">First Name</label>
+									<span className="text-sm font-medium text-muted-foreground">First Name</span>
 									<p className="text-foreground">{trainer.signupDetails.firstName}</p>
 								</div>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Last Name</label>
+									<span className="text-sm font-medium text-muted-foreground">Last Name</span>
 									<p className="text-foreground">{trainer.signupDetails.lastName}</p>
 								</div>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Date of Birth</label>
-									<p className="text-foreground">{format(new Date(trainer.signupDetails.dateOfBirth), 'MMM dd, yyyy')}</p>
+									<span className="text-sm font-medium text-muted-foreground">Date of Birth</span>
+									<p className="text-foreground">
+										{format(new Date(trainer.signupDetails.dateOfBirth), "MMM dd, yyyy")}
+									</p>
 								</div>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Gender</label>
+									<span className="text-sm font-medium text-muted-foreground">Gender</span>
 									<p className="text-foreground capitalize">{trainer.signupDetails.gender}</p>
 								</div>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Experience</label>
+									<span className="text-sm font-medium text-muted-foreground">Experience</span>
 									<p className="text-foreground">{trainer.signupDetails.experience}</p>
 								</div>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Location</label>
+									<span className="text-sm font-medium text-muted-foreground">Location</span>
 									<p className="text-foreground">{trainer.signupDetails.location}</p>
 								</div>
 							</div>
-							
+
 							<div>
-								<label className="text-sm font-medium text-muted-foreground">Specializations</label>
+								<span className="text-sm font-medium text-muted-foreground">Specializations</span>
 								<div className="flex flex-wrap gap-2 mt-1">
 									{trainer.signupDetails.specialization.map((spec) => (
-										<Badge key={spec} variant="outline">{spec}</Badge>
+										<Badge key={spec} variant="outline">
+											{spec}
+										</Badge>
 									))}
 								</div>
 							</div>
-							
+
 							<div>
-								<label className="text-sm font-medium text-muted-foreground">Certifications</label>
+								<span className="text-sm font-medium text-muted-foreground">Certifications</span>
 								<div className="flex flex-wrap gap-2 mt-1">
 									{trainer.signupDetails.certification.map((cert) => (
-										<Badge key={cert} variant="outline">{cert}</Badge>
+										<Badge key={cert} variant="outline">
+											{cert}
+										</Badge>
 									))}
 								</div>
 							</div>
@@ -209,31 +216,33 @@ export default function TrainerDetails() {
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 								<div className="space-y-4">
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Plan</label>
+										<span className="text-sm font-medium text-muted-foreground">Plan</span>
 										<p className="text-lg font-semibold capitalize">{trainer.subscription.plan}</p>
 									</div>
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Status</label>
-										<Badge variant={trainer.subscription.status === 'active' ? 'default' : 'secondary'}>
+										<span className="text-sm font-medium text-muted-foreground">Status</span>
+										<Badge variant={trainer.subscription.status === "active" ? "default" : "secondary"}>
 											{trainer.subscription.status}
 										</Badge>
 									</div>
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Price</label>
+										<span className="text-sm font-medium text-muted-foreground">Price</span>
 										<p className="text-lg font-semibold">
-											{trainer.subscription.price === 0 ? 'Free' : `$${trainer.subscription.price}/year`}
+											{trainer.subscription.price === 0 ? "Free" : `$${trainer.subscription.price}/year`}
 										</p>
 									</div>
 								</div>
-								
+
 								<div className="space-y-4">
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Start Date</label>
-										<p className="text-foreground">{format(new Date(trainer.subscription.startDate), 'MMM dd, yyyy')}</p>
+										<span className="text-sm font-medium text-muted-foreground">Start Date</span>
+										<p className="text-foreground">
+											{format(new Date(trainer.subscription.startDate), "MMM dd, yyyy")}
+										</p>
 									</div>
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">End Date</label>
-										<p className="text-foreground">{format(new Date(trainer.subscription.endDate), 'MMM dd, yyyy')}</p>
+										<span className="text-sm font-medium text-muted-foreground">End Date</span>
+										<p className="text-foreground">{format(new Date(trainer.subscription.endDate), "MMM dd, yyyy")}</p>
 									</div>
 								</div>
 							</div>
@@ -242,7 +251,7 @@ export default function TrainerDetails() {
 				</TabsContent>
 
 				{/* Payments Tab */}
-				<TabsContent value="payments" className="space-y-4">
+				{/* <TabsContent value="payments" className="space-y-4">
 					<Card>
 						<CardHeader>
 							<CardTitle>Payment History</CardTitle>
@@ -268,14 +277,12 @@ export default function TrainerDetails() {
 									<TableBody>
 										{trainer.paymentHistory.map((payment) => (
 											<TableRow key={payment.id}>
-												<TableCell>{format(new Date(payment.date), 'MMM dd, yyyy')}</TableCell>
+												<TableCell>{format(new Date(payment.date), "MMM dd, yyyy")}</TableCell>
 												<TableCell>{payment.description}</TableCell>
 												<TableCell className="font-medium">${payment.amount}</TableCell>
 												<TableCell>{payment.paymentMethod}</TableCell>
 												<TableCell>
-													<Badge variant={getPaymentStatusColor(payment.status) as any}>
-														{payment.status}
-													</Badge>
+													<Badge variant={getPaymentStatusColor(payment.status) as any}>{payment.status}</Badge>
 												</TableCell>
 												<TableCell className="font-mono text-sm">{payment.transactionId}</TableCell>
 											</TableRow>
@@ -285,7 +292,7 @@ export default function TrainerDetails() {
 							)}
 						</CardContent>
 					</Card>
-				</TabsContent>
+				</TabsContent> */}
 
 				{/* Trainees Tab */}
 				<TabsContent value="trainees" className="space-y-4">
@@ -296,7 +303,10 @@ export default function TrainerDetails() {
 						<CardContent>
 							{trainerTrainees.length === 0 ? (
 								<div className="text-center py-8 text-muted-foreground">
-									<Icon icon="solar:users-group-two-rounded-bold-duotone" className="h-12 w-12 mx-auto mb-2 opacity-50" />
+									<Icon
+										icon="solar:users-group-two-rounded-bold-duotone"
+										className="h-12 w-12 mx-auto mb-2 opacity-50"
+									/>
 									<p>No trainees assigned to this trainer</p>
 								</div>
 							) : (
@@ -306,30 +316,30 @@ export default function TrainerDetails() {
 											<CardContent className="p-4">
 												<div className="flex items-center gap-4">
 													<Avatar className="h-10 w-10">
-														<img 
-															src={trainee.avatar || "/src/assets/images/avatars/avatar-4.png"} 
+														<img
+															src={trainee.avatar || "/src/assets/images/avatars/avatar-4.png"}
 															alt={trainee.name}
 															className="object-cover"
 														/>
 													</Avatar>
-													
+
 													<div className="flex-1">
 														<div className="flex items-start justify-between">
 															<div>
 																<h4 className="font-semibold">{trainee.name}</h4>
 																<p className="text-sm text-muted-foreground">{trainee.email}</p>
 															</div>
-															<Badge variant={trainee.status === 'active' ? 'default' : 'secondary'}>
+															<Badge variant={trainee.status === "active" ? "default" : "secondary"}>
 																{trainee.status}
 															</Badge>
 														</div>
-														
+
 														<div className="mt-2 flex gap-4 text-sm text-muted-foreground">
 															<span>{trainee.programsEnrolled} programs</span>
 															<span>{trainee.completedWorkouts} workouts</span>
-															<span>Last active {format(new Date(trainee.lastActive), 'MMM dd')}</span>
+															<span>Last active {format(new Date(trainee.lastActive), "MMM dd")}</span>
 														</div>
-														
+
 														{trainee.currentProgram && (
 															<div className="mt-2">
 																<span className="text-sm font-medium">Current: </span>

@@ -12,6 +12,7 @@ export enum UserStatus {
  */
 export interface User {
 	id: string;
+	image: string;
 	email: string;
 	firstName: string;
 	lastName: string;

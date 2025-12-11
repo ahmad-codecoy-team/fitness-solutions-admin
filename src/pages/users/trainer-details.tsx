@@ -1,25 +1,27 @@
 import { Icon } from "@/components/icon";
 import { mockTrainees, mockTrainers } from "@/mocks/users";
-// import { type PaymentRecord, type Trainee, type Trainer, mockTrainees, mockTrainers } from "@/mocks/users";
 import { Avatar } from "@/ui/avatar";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import TraineesTable from "./components/trainees-table";
+import AddTraineeForm from "./components/add-trainee-form";
 
 export default function TrainerDetails() {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
+	const [addTraineeDialogOpen, setAddTraineeDialogOpen] = useState(false);
+	const [trainerTrainees, setTrainerTrainees] = useState(() => 
+		mockTrainees.filter((t) => t.trainerId === id)
+	);
 
 	// Find trainer by ID
 	const trainer = mockTrainers.find((t) => t.id === id);
-
-	// Get trainees under this trainer
-	const trainerTrainees = mockTrainees.filter((t) => t.trainerId === id);
 
 	if (!trainer) {
 		return (
@@ -33,6 +35,10 @@ export default function TrainerDetails() {
 	const handleToggleStatus = () => {
 		console.log("Toggle trainer status:", trainer.id);
 		// API call to suspend/activate trainer
+	};
+
+	const handleTraineeAdded = (newTrainee: any) => {
+		setTrainerTrainees(prev => [...prev, newTrainee]);
 	};
 
 	const getStatusColor = (status: string) => {
@@ -296,67 +302,22 @@ export default function TrainerDetails() {
 
 				{/* Trainees Tab */}
 				<TabsContent value="trainees" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Trainees ({trainerTrainees.length})</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{trainerTrainees.length === 0 ? (
-								<div className="text-center py-8 text-muted-foreground">
-									<Icon
-										icon="solar:users-group-two-rounded-bold-duotone"
-										className="h-12 w-12 mx-auto mb-2 opacity-50"
-									/>
-									<p>No trainees assigned to this trainer</p>
-								</div>
-							) : (
-								<div className="grid gap-4">
-									{trainerTrainees.map((trainee) => (
-										<Card key={trainee.id}>
-											<CardContent className="p-4">
-												<div className="flex items-center gap-4">
-													<Avatar className="h-10 w-10">
-														<img
-															src={trainee.avatar || "/src/assets/images/avatars/avatar-4.png"}
-															alt={trainee.name}
-															className="object-cover"
-														/>
-													</Avatar>
-
-													<div className="flex-1">
-														<div className="flex items-start justify-between">
-															<div>
-																<h4 className="font-semibold">{trainee.name}</h4>
-																<p className="text-sm text-muted-foreground">{trainee.email}</p>
-															</div>
-															<Badge variant={trainee.status === "active" ? "default" : "secondary"}>
-																{trainee.status}
-															</Badge>
-														</div>
-
-														<div className="mt-2 flex gap-4 text-sm text-muted-foreground">
-															<span>{trainee.programsEnrolled} programs</span>
-															<span>{trainee.completedWorkouts} workouts</span>
-															<span>Last active {format(new Date(trainee.lastActive), "MMM dd")}</span>
-														</div>
-
-														{trainee.currentProgram && (
-															<div className="mt-2">
-																<span className="text-sm font-medium">Current: </span>
-																<span className="text-sm text-muted-foreground">{trainee.currentProgram}</span>
-															</div>
-														)}
-													</div>
-												</div>
-											</CardContent>
-										</Card>
-									))}
-								</div>
-							)}
-						</CardContent>
-					</Card>
+					<TraineesTable 
+						trainees={trainerTrainees}
+						onAddTrainee={() => setAddTraineeDialogOpen(true)}
+						showAddButton={true}
+					/>
 				</TabsContent>
 			</Tabs>
+
+			{/* Add Trainee Dialog */}
+			<AddTraineeForm
+				open={addTraineeDialogOpen}
+				onClose={() => setAddTraineeDialogOpen(false)}
+				trainerId={trainer.id}
+				trainerName={trainer.name}
+				onTraineeAdded={handleTraineeAdded}
+			/>
 		</div>
 	);
 }

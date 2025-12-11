@@ -145,7 +145,7 @@ export default function UserDetails() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+		<div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
 			<div className="container mx-auto p-6 space-y-8">
 				{/* Header with Back Button */}
 				<div className="flex items-center gap-4 mb-8">
@@ -159,13 +159,13 @@ export default function UserDetails() {
 				<div className="relative">
 					<div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 						{/* Background Pattern */}
-						<div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
+						<div className="absolute inset-0 bg-linear-to-r from-blue-600/10 to-purple-600/10" />
 
 						<div className="relative p-8">
 							<div className="flex flex-col md:flex-row items-start md:items-center gap-6">
 								{/* Profile Image */}
 								<div className="relative">
-									<div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 p-1 shadow-lg">
+									<div className="w-32 h-32 rounded-full bg-linear-to-br from-blue-400 to-purple-500 p-1 shadow-lg">
 										<img
 											src={getImageUrl(user.image) || getFallbackImageUrl("user")}
 											alt={`${user.firstName} ${user.lastName}`}
@@ -283,22 +283,6 @@ export default function UserDetails() {
 					onCancel={() => setSuspendDialogOpen(false)}
 				/>
 			)}
-
-			{/* Liked Flyers Modal */}
-			{/* <LikedFlyersModal
-				flyers={likedFlyers}
-				isOpen={flyersModalOpen}
-				onClose={() => setFlyersModalOpen(false)}
-				userName={user ? `${user.firstName} ${user.lastName}` : "User"}
-			/> */}
-
-			{/* Liked Stores Modal */}
-			{/* <LikedStoresModal
-				stores={likedStores}
-				isOpen={storesModalOpen}
-				onClose={() => setStoresModalOpen(false)}
-				userName={user ? `${user.firstName} ${user.lastName}` : "User"}
-			/> */}
 		</div>
 	);
 }

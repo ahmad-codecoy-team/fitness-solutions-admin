@@ -65,11 +65,18 @@ export default function FitnessOverview() {
 
 	const statCards: StatCardProps[] = [
 		{
-			title: "Total Users",
-			value: stats.totalUsers.toLocaleString(),
-			subtitle: "Trainers & Trainees",
+			title: "Total Trainers",
+			value: stats.totalTrainers.toLocaleString(),
+			subtitle: "Registered fitness trainers",
 			icon: "solar:user-bold-duotone",
 			color: "#5942d9",
+		},
+		{
+			title: "Total Trainees",
+			value: stats.totalTrainees.toLocaleString(),
+			subtitle: "Client accounts",
+			icon: "solar:users-group-two-rounded-bold-duotone",
+			color: "#ff6b6b",
 		},
 		{
 			title: "Total Programs",
@@ -108,7 +115,7 @@ export default function FitnessOverview() {
 			</div>
 
 			{/* Stats Cards */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 				{statCards.map((card, index) => (
 					<StatCard key={card.title} {...card} index={index} />
 				))}

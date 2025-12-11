@@ -1,16 +1,5 @@
-## New Error from create flyer
+## Tokens logs
 
-TypeError: createFlyerSchema.omit is not a function
-
-TypeError: createFlyerSchema.omit is not a function
-at CreateStoreFlyerForm (http://localhost:3000/src/pages/stores/components/create-flyer-form.tsx:94:40)
-at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:11596:26)
-at mountIndeterminateComponent (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:14974:21)
-at beginWork (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:15962:22)
-at beginWork$1 (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:19806:22)
-at performUnitOfWork (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:19251:20)
-at workLoopSync (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:19190:13)
-at renderRootSync (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:19169:15)
-at recoverFromConcurrentError (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:18786:28)
-at performConcurrentWorkOnRoot (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js?v=33e2561a:18734:30)
-/src/pages/stores/components/create-flyer-form.tsx:94:40) at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/chunk-3VTW7PKX.js (CreateStoreFlyerForm)
+=== TOKEN DEBUG ===
+Tmp*rovodev_debug_tokens.tsx:12 Current token: {accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y…vbSJ9.d9mn3q2rBI_SJP2_cZOKRaPSNZvy0S774f7uktcOiYg', refreshToken: undefined}accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YTQxYWE2OWI0NDZjZDA4NjUxYWU4MiIsInJvbGUiOiJhZG1pbiIsImlzQWN0aXZlIjp0cnVlLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NjU0NTQ4ODEsImV4cCI6MTc5NzAxMjQ4MSwiYXVkIjoicm9vdCIsImlzcyI6ImFkbWluQGFkbWluLmNvbSIsInN1YiI6ImFkbWluQGFkbWluLmNvbSJ9.d9mn3q2rBI_SJP2_cZOKRaPSNZvy0S774f7uktcOiYg"refreshToken: undefined[[Prototype]]: Object
+Tmp_rovodev_debug_tokens.tsx:13 localStorage userStore: {"state":{"userInfo":{"location":{"type":"Point","coordinates":[0,0]},"city":null,"\_id":"68a41aa69b446cd08651ae82","image":"1755584513464-download*(1).jpeg","fullname":"admin","email":"admin@admin.com","password":"$2b$12$l6PzL33hPJTvfY80.6OvPe3gnZxg6pHv1.fHBp5NeT4kbZKUTsh3u","phoneNo":"+92300000000","role":{"\_id":"68a2cdccf92bff64b43b6310","name":"admin","createdAt":"2025-08-18T06:53:00.965Z","updatedAt":"2025-08-18T06:53:00.965Z","**v":0},"isActive":true,"isProfileCompleted":false,"notifications":true,"firebaseId":"","accountType":"email","subscriptionType":"free","subscriptionDate":null,"subscriptionExpiryDate":null,"createdAt":"2025-08-19T06:33:10.761Z","updatedAt":"2025-08-19T06:33:10.761Z","**v":0},"userToken":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YTQxYWE2OWI0NDZjZDA4NjUxYWU4MiIsInJvbGUiOiJhZG1pbiIsImlzQWN0aXZlIjp0cnVlLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NjU0NTQ4ODEsImV4cCI6MTc5NzAxMjQ4MSwiYXVkIjoicm9vdCIsImlzcyI6ImFkbWluQGFkbWluLmNvbSIsInN1YiI6ImFkbWluQGFkbWluLmNvbSJ9.d9mn3q2rBI_SJP2_cZOKRaPSNZvy0S774f7uktcOiYg"}},"version":0}

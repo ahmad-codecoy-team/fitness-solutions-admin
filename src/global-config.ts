@@ -14,8 +14,6 @@ export type GlobalConfig = {
 	publicPath: string;
 	/** Base URL for API endpoints */
 	apiBaseUrl: string;
-	/** Routing mode: frontend routing or backend routing */
-	routerMode: "frontend" | "backend";
 };
 
 /**
@@ -35,5 +33,4 @@ export const GLOBAL_CONFIG: GlobalConfig = {
 		import.meta.env.VITE_API_URL ||
 		import.meta.env.VITE_APP_API_BASE_URL ||
 		"/api/v1",
-	routerMode: (import.meta.env.VITE_APP_ROUTER_MODE as "frontend" | "backend") || "frontend",
 };

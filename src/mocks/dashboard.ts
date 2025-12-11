@@ -28,8 +28,8 @@ export const mockDashboardStats: DashboardStats = {
 	totalExercises: 420,
 	activeUsers: 938,
 	inactiveUsers: 312,
-	totalTrainers: 75,
-	totalTrainees: 1175,
+	totalTrainers: 3,
+	totalTrainees: 5,
 };
 
 export const mockUserActivityData: UserActivityData[] = [

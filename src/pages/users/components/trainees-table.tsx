@@ -7,8 +7,8 @@ import { Icon } from "@/components/icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Input } from "@/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
-import { type Trainee } from "@/mocks/users";
-import { format, formatDistanceToNow } from "date-fns";
+import type { Trainee } from "@/mocks/users";
+import { format } from "date-fns";
 
 interface TraineesTableProps {
 	trainees: Trainee[];
@@ -25,7 +25,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 	// Filter and sort trainees
 	const filteredTrainees = trainees
 		.filter((trainee) => {
-			const matchesSearch = 
+			const matchesSearch =
 				trainee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				trainee.email.toLowerCase().includes(searchTerm.toLowerCase());
 			const matchesStatus = statusFilter === "all" || trainee.status === statusFilter;
@@ -36,7 +36,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 			let bValue = b[sortBy];
 
 			// Handle date properties
-			if (sortBy === "createdAt" || sortBy === "lastActive") {
+			if (sortBy === "createdAt") {
 				aValue = new Date(a[sortBy]).getTime();
 				bValue = new Date(b[sortBy]).getTime();
 			}
@@ -63,6 +63,8 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 				return <Badge variant="default">Active</Badge>;
 			case "inactive":
 				return <Badge variant="secondary">Inactive</Badge>;
+			case "in_progress":
+				return <Badge variant="outline">In Progress</Badge>;
 			default:
 				return <Badge variant="secondary">{status}</Badge>;
 		}
@@ -72,8 +74,8 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 		if (sortBy !== column) {
 			return "solar:sort-vertical-bold-duotone";
 		}
-		return sortOrder === "asc" 
-			? "solar:sort-from-bottom-to-top-bold-duotone" 
+		return sortOrder === "asc"
+			? "solar:sort-from-bottom-to-top-bold-duotone"
 			: "solar:sort-from-top-to-bottom-bold-duotone";
 	};
 
@@ -130,17 +132,14 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 							<TableHeader>
 								<TableRow>
 									<TableHead>Trainee</TableHead>
-									<TableHead 
-										className="cursor-pointer hover:bg-muted/50"
-										onClick={() => handleSort("status")}
-									>
+									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("status")}>
 										<div className="flex items-center gap-1">
 											Status
 											<Icon icon={getSortIcon("status")} className="h-4 w-4" />
 										</div>
 									</TableHead>
 									<TableHead>Current Program</TableHead>
-									<TableHead 
+									<TableHead
 										className="cursor-pointer hover:bg-muted/50"
 										onClick={() => handleSort("programsEnrolled")}
 									>
@@ -149,7 +148,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 											<Icon icon={getSortIcon("programsEnrolled")} className="h-4 w-4" />
 										</div>
 									</TableHead>
-									<TableHead 
+									<TableHead
 										className="cursor-pointer hover:bg-muted/50"
 										onClick={() => handleSort("completedWorkouts")}
 									>
@@ -158,24 +157,13 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 											<Icon icon={getSortIcon("completedWorkouts")} className="h-4 w-4" />
 										</div>
 									</TableHead>
-									<TableHead 
-										className="cursor-pointer hover:bg-muted/50"
-										onClick={() => handleSort("lastActive")}
-									>
-										<div className="flex items-center gap-1">
-											Last Active
-											<Icon icon={getSortIcon("lastActive")} className="h-4 w-4" />
-										</div>
-									</TableHead>
-									<TableHead 
-										className="cursor-pointer hover:bg-muted/50"
-										onClick={() => handleSort("createdAt")}
-									>
+									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("createdAt")}>
 										<div className="flex items-center gap-1">
 											Joined
 											<Icon icon={getSortIcon("createdAt")} className="h-4 w-4" />
 										</div>
 									</TableHead>
+									<TableHead className="text-right">Actions</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -184,8 +172,8 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 										<TableCell>
 											<div className="flex items-center gap-3">
 												<Avatar className="h-10 w-10">
-													<img 
-														src={trainee.avatar || "/src/assets/images/avatars/avatar-1.png"} 
+													<img
+														src={trainee.avatar || "/src/assets/images/avatars/avatar-1.png"}
 														alt={trainee.name}
 														className="object-cover"
 													/>
@@ -193,15 +181,11 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 												<div>
 													<div className="font-medium">{trainee.name}</div>
 													<div className="text-sm text-muted-foreground">{trainee.email}</div>
-													{trainee.phone && (
-														<div className="text-xs text-muted-foreground">{trainee.phone}</div>
-													)}
+													{trainee.phone && <div className="text-xs text-muted-foreground">{trainee.phone}</div>}
 												</div>
 											</div>
 										</TableCell>
-										<TableCell>
-											{getStatusBadge(trainee.status)}
-										</TableCell>
+										<TableCell>{getStatusBadge(trainee.status)}</TableCell>
 										<TableCell>
 											{trainee.currentProgram ? (
 												<Badge variant="outline" className="text-xs">
@@ -224,35 +208,34 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className="flex flex-col gap-1">
-												<span className="text-sm">
-													{formatDistanceToNow(new Date(trainee.lastActive), { addSuffix: true })}
-												</span>
-												<span className="text-xs text-muted-foreground">
-													{format(new Date(trainee.lastActive), 'MMM dd, yyyy')}
-												</span>
-											</div>
+											<span className="text-sm">{format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>
 										</TableCell>
-										<TableCell>
-											<span className="text-sm">
-												{format(new Date(trainee.createdAt), 'MMM dd, yyyy')}
-											</span>
+										<TableCell className="text-right">
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => window.open(`/users/trainee/${trainee.id}`, "_self")}
+											>
+												<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
+											</Button>
 										</TableCell>
 									</TableRow>
 								))}
 							</TableBody>
 						</Table>
 					</div>
-					
+
 					{filteredTrainees.length === 0 && (
 						<div className="text-center py-8">
-							<Icon icon="solar:users-group-rounded-bold-duotone" className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+							<Icon
+								icon="solar:users-group-rounded-bold-duotone"
+								className="h-12 w-12 text-muted-foreground mx-auto mb-4"
+							/>
 							<h3 className="text-lg font-medium">No trainees found</h3>
 							<p className="text-muted-foreground">
-								{trainees.length === 0 
+								{trainees.length === 0
 									? "This trainer has no trainees yet"
-									: "Try adjusting your search or filter criteria"
-								}
+									: "Try adjusting your search or filter criteria"}
 							</p>
 						</div>
 					)}

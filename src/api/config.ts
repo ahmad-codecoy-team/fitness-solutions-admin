@@ -6,9 +6,9 @@
 const env = import.meta.env;
 
 export const API_CONFIG = {
-	BASE_URL: env.VITE_API_URL || "http://194.195.92.92/kampanyes-backend/api/v1",
-	DEV_URL: env.VITE_DEV_API_URL || "http://localhost:9876/api/v1",
-	FILE_STORAGE_URL: env.VITE_FILE_URL || "http://194.195.92.92/kampanyes-backend/uploads",
+	BASE_URL: env.VITE_API_URL || "http://localhost:3000/api/v1",
+	DEV_URL: env.VITE_DEV_API_URL || "http://localhost:3000/api/v1",
+	FILE_STORAGE_URL: env.VITE_FILE_URL || "http://localhost:3000/uploads",
 	TIMEOUT: 55000,
 	HEADERS: {
 		"Content-Type": "application/json",
@@ -24,83 +24,48 @@ export const API_CONFIG = {
 export const ENDPOINTS = {
 	AUTH: {
 		LOGIN: "/auth/login",
-		SIGNUP: "/user/sign-up",
-		GOOGLE_LOGIN: "/auth/google-login",
+		SIGNUP: "/auth/signup",
 		FORGOT_PASSWORD: "/auth/forgot-password",
-		VERIFY_OTP: "/auth/verify-otp",
 		RESET_PASSWORD: "/auth/reset-password",
 		CHANGE_PASSWORD: "/auth/change-password",
 	},
 
-	USER: {
-		UPDATE_PROFILE: "/user/update-profile",
-		DELETE_USER: (id: string) => `/user/${id}`,
-		GET_USER_BY_ID: (id: string) => `/user/${id}`,
-		TOGGLE_STATUS: (id: string) => `/user/toggle/status/${id}`,
-		LIST: "/user/",
+	TRAINERS: {
+		LIST: "/trainers",
+		GET_BY_ID: (id: string) => `/trainers/${id}`,
+		UPDATE: (id: string) => `/trainers/${id}`,
+		TOGGLE_STATUS: (id: string) => `/trainers/${id}/status`,
+	},
+
+	TRAINEES: {
+		LIST: "/trainees",
+		CREATE: "/trainees",
+		GET_BY_ID: (id: string) => `/trainees/${id}`,
+		UPDATE: (id: string) => `/trainees/${id}`,
+		BY_TRAINER: (trainerId: string) => `/trainers/${trainerId}/trainees`,
+	},
+
+	NOTIFICATIONS: {
+		LIST: "/notifications",
+		CREATE: "/notifications",
+		GET_BY_ID: (id: string) => `/notifications/${id}`,
+		UPDATE: (id: string) => `/notifications/${id}`,
+		DELETE: (id: string) => `/notifications/${id}`,
 	},
 
 	UPLOADS: {
 		IMAGE_UPLOAD: "/uploads/image",
-		DOCUMENT_UPLOAD: "/uploads/document/file",
 		DELETE_IMAGE: "/uploads/delete/image",
-		DELETE_FILE: "/uploads/delete",
 	},
 
-	STORES: {
-		CREATE: "/store/create",
-		LIST: "/store/",
-		GET_BY_ID: (id: string) => `/store/${id}`,
-		UPDATE: (id: string) => `/store/${id}`,
-		DELETE: (id: string) => `/store/${id}`,
+	DASHBOARD: {
+		STATS: "/dashboard/stats",
 	},
 
-	CATEGORIES: {
-		CREATE: "/category/",
-		LIST: "/category/",
-		GET_BY_ID: (id: string) => `/category/${id}`,
-		UPDATE: (id: string) => `/category/${id}`,
-		DELETE: (id: string) => `/category/${id}`,
-	},
-
-	FOLDERS: {
-		CREATE: "/folder/",
-		UPDATE: (id: string) => `/folder/${id}`,
-		GET_BY_ID: (id: string) => `/folder/${id}`,
-		LIST: "/folder/",
-	},
-
-	FLYERS: {
-		CREATE: "/flyer/",
-		UPDATE: (id: string) => `/flyer/${id}`,
-		GET_BY_ID: (id: string) => `/flyer/${id}`,
-		DELETE: (id: string) => `/flyer/${id}`,
-		LIST_BY_FOLDER: (folderId: string) => `/flyer/by/folder/${folderId}`,
-	},
-
-	FAVORITE: {
-		TOGGLE: "/favorite/",
-		LIST: "/favorite/",
-	},
-
-	STATS: {
-		OVERVIEW: "/stats",
-	},
-
-	TERMS: {
-		GET: "/termAndCondition",
-		CREATE: "/termAndCondition",
-		UPDATE: "/termAndCondition",
-	},
-
-	PRIVACY_POLICY: {
-		GET: "/privacyPolicy",
-		CREATE: "/privacyPolicy",
-		UPDATE: "/privacyPolicy",
-	},
-
-	APP_SETTINGS: {
-		GET: "/appSetting",
-		UPDATE: (id: string) => `/appSetting/${id}`,
+	LEGAL: {
+		TERMS_GET: "/legal/terms",
+		TERMS_UPDATE: "/legal/terms",
+		PRIVACY_GET: "/legal/privacy",
+		PRIVACY_UPDATE: "/legal/privacy",
 	},
 };

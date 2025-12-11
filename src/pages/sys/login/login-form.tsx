@@ -18,15 +18,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 	const { t } = useTranslation();
 	const [loading, setLoading] = useState(false);
 	const [remember, setRemember] = useState(true);
-	const navigatge = useNavigate();
+	const navigate = useNavigate();
 
 	const { loginState } = useLoginStateContext();
 	const signIn = useSignIn();
 
 	const form = useForm<SignInReq>({
 		defaultValues: {
-			email: "admin@admin.com",
-			password: "123456",
+			email: "",
+			password: "",
 		},
 	});
 
@@ -36,7 +36,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 		setLoading(true);
 		try {
 			await signIn(values);
-			navigatge(GLOBAL_CONFIG.defaultRoute, { replace: true });
+			navigate(GLOBAL_CONFIG.defaultRoute, { replace: true });
 			toast.success(t("sys.login.loginSuccessTitle"), {
 				closeButton: true,
 			});
@@ -62,7 +62,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 							<FormItem>
 								<FormLabel>Email</FormLabel>
 								<FormControl>
-									<Input placeholder="admin@admin.com" type="email" {...field} />
+									<Input placeholder="Enter your email" type="email" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -104,6 +104,20 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 						{loading && <Loader2 className="animate-spin mr-2" />}
 						{t("sys.login.loginButton")}
 					</Button>
+
+					{/* 注册链接 */}
+					<div className="text-center">
+						<p className="text-sm text-muted-foreground">
+							Don't have an account?{" "}
+							<Button
+								variant="link"
+								className="p-0 h-auto font-semibold text-primary"
+								onClick={() => navigate("/signup")}
+							>
+								Sign Up
+							</Button>
+						</p>
+					</div>
 				</form>
 			</Form>
 		</div>

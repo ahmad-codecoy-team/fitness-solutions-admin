@@ -40,6 +40,11 @@ export const frontendNavData: NavProps["data"] = [
 				path: "/privacy-policy",
 				icon: <Icon icon="solar:shield-check-bold-duotone" size="24" />,
 			},
+			{
+				title: "sys.nav.about_us",
+				path: "/about-us",
+				icon: <Icon icon="solar:info-circle-bold-duotone" size="24" />,
+			},
 		],
 	},
 ];

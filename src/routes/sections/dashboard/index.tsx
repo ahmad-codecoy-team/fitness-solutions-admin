@@ -11,6 +11,9 @@ export const dashboardRoutes: RouteObject[] = [
 				<DashboardLayout />
 			</LoginAuthGuard>
 		),
-		children: [{ index: true, element: <Navigate to="overview" replace /> }, ...frontendDashboardRoutes],
+		children: [
+			{ index: true, element: <Navigate to="overview" replace /> }, 
+			...frontendDashboardRoutes
+		],
 	},
 ];

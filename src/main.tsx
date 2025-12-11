@@ -11,22 +11,17 @@ import { routesSection } from "./routes/sections";
 
 await registerLocalIcons();
 
-const router = createBrowserRouter(
-	[
-		{
-			Component: () => (
-				<App>
-					<Outlet />
-				</App>
-			),
-			errorElement: <ErrorBoundary />,
-			children: routesSection,
-		},
-	],
+const router = createBrowserRouter([
 	{
-		basename: GLOBAL_CONFIG.publicPath,
+		Component: () => (
+			<App>
+				<Outlet />
+			</App>
+		),
+		errorElement: <ErrorBoundary />,
+		children: routesSection,
 	},
-);
+]);
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(<RouterProvider router={router} />);

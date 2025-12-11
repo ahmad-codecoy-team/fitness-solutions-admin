@@ -28,7 +28,7 @@ export default function AccountDropdown() {
 		} catch (error) {
 			console.log(error);
 		} finally {
-			replace("/auth/login");
+			replace("/login");
 		}
 	};
 

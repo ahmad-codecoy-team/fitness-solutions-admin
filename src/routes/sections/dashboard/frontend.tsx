@@ -10,7 +10,7 @@ export const frontendDashboardRoutes: RouteObject[] = [
 		children: [
 			{ index: true, element: Component("/pages/users") },
 			{ path: "trainer/:id", element: Component("/pages/users/trainer-details") },
-			{ path: ":id", element: Component("/pages/users/details") },
+			{ path: "trainee/:id", element: Component("/pages/users/trainee-details") },
 		],
 	},
 	{
@@ -23,6 +23,7 @@ export const frontendDashboardRoutes: RouteObject[] = [
 	},
 	{ path: "terms-and-conditions", element: Component("/pages/terms-and-conditions") },
 	{ path: "privacy-policy", element: Component("/pages/privacy-policy") },
+	{ path: "about-us", element: Component("/pages/about-us") },
 	{
 		path: "error",
 		children: [

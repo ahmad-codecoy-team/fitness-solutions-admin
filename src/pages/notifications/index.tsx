@@ -115,56 +115,6 @@ export default function NotificationsManagement() {
 				</div>
 			</div>
 
-			{/* Stats Cards */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-							<Icon icon="solar:notification-unread-bold-duotone" className="h-4 w-4" />
-							Total Notifications
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="pb-4">
-						<div className="text-2xl font-bold">{totalNotifications}</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-							<Icon icon="solar:check-circle-bold-duotone" className="h-4 w-4 text-green-600" />
-							Sent
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="pb-4">
-						<div className="text-2xl font-bold text-green-600">{sentNotifications}</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-							<Icon icon="solar:eye-bold-duotone" className="h-4 w-4 text-blue-600" />
-							Total Reads
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="pb-4">
-						<div className="text-2xl font-bold text-blue-600">{totalReads}</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-							<Icon icon="solar:cursor-bold-duotone" className="h-4 w-4 text-purple-600" />
-							Total Clicks
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="pb-4">
-						<div className="text-2xl font-bold text-purple-600">{totalClicks}</div>
-					</CardContent>
-				</Card>
-			</div>
 
 			{/* Tabs */}
 			<Tabs defaultValue="send" className="w-full">
@@ -220,8 +170,6 @@ export default function NotificationsManagement() {
 										<TableHead>Recipients</TableHead>
 										<TableHead>Status</TableHead>
 										<TableHead>Date</TableHead>
-										<TableHead>Reads</TableHead>
-										<TableHead>Clicks</TableHead>
 										<TableHead>Actions</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -269,12 +217,6 @@ export default function NotificationsManagement() {
 														}
 													</div>
 												</div>
-											</TableCell>
-											<TableCell className="text-center">
-												{notification.readCount}
-											</TableCell>
-											<TableCell className="text-center">
-												{notification.clickCount}
 											</TableCell>
 											<TableCell>
 												<Button variant="ghost" size="sm">

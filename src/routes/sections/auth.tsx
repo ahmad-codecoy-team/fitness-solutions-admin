@@ -1,23 +1,24 @@
 import { Suspense, lazy } from "react";
-import { Outlet } from "react-router";
 import type { RouteObject } from "react-router";
 
 const LoginPage = lazy(() => import("@/pages/sys/login"));
-const authCustom: RouteObject[] = [
-	{
-		path: "login",
-		element: <LoginPage />,
-	},
-];
+const SignupPage = lazy(() => import("@/pages/sys/signup"));
 
 export const authRoutes: RouteObject[] = [
 	{
-		path: "auth",
+		path: "login",
 		element: (
 			<Suspense>
-				<Outlet />
+				<LoginPage />
 			</Suspense>
 		),
-		children: [...authCustom],
+	},
+	{
+		path: "signup", 
+		element: (
+			<Suspense>
+				<SignupPage />
+			</Suspense>
+		),
 	},
 ];

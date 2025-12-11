@@ -16,9 +16,7 @@ export default function TrainerDetails() {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const [addTraineeDialogOpen, setAddTraineeDialogOpen] = useState(false);
-	const [trainerTrainees, setTrainerTrainees] = useState(() => 
-		mockTrainees.filter((t) => t.trainerId === id)
-	);
+	const [trainerTrainees, setTrainerTrainees] = useState(() => mockTrainees.filter((t) => t.trainerId === id));
 
 	// Find trainer by ID
 	const trainer = mockTrainers.find((t) => t.id === id);
@@ -38,7 +36,7 @@ export default function TrainerDetails() {
 	};
 
 	const handleTraineeAdded = (newTrainee: any) => {
-		setTrainerTrainees(prev => [...prev, newTrainee]);
+		setTrainerTrainees((prev) => [...prev, newTrainee]);
 	};
 
 	const getStatusColor = (status: string) => {
@@ -53,21 +51,6 @@ export default function TrainerDetails() {
 				return "secondary";
 		}
 	};
-
-	// const getPaymentStatusColor = (status: string) => {
-	// 	switch (status) {
-	// 		case "completed":
-	// 			return "default";
-	// 		case "pending":
-	// 			return "secondary";
-	// 		case "failed":
-	// 			return "destructive";
-	// 		case "refunded":
-	// 			return "outline";
-	// 		default:
-	// 			return "secondary";
-	// 	}
-	// };
 
 	return (
 		<div className="flex flex-col gap-6 p-6">
@@ -100,14 +83,13 @@ export default function TrainerDetails() {
 								<div>
 									<h1 className="text-3xl font-bold text-foreground">{trainer.name}</h1>
 									<p className="text-lg text-muted-foreground">{trainer.email}</p>
-									<p className="text-muted-foreground">{trainer.phone}</p>
-									<p className="text-muted-foreground">{trainer.signupDetails.location}</p>
 								</div>
 
 								<div className="flex items-center gap-2">
 									<Badge variant={getStatusColor(trainer.status) as any}>{trainer.status}</Badge>
 									<Button
 										variant={trainer.status === "suspended" ? "default" : "destructive"}
+										size="sm"
 										onClick={handleToggleStatus}
 									>
 										<Icon
@@ -119,22 +101,14 @@ export default function TrainerDetails() {
 								</div>
 							</div>
 
-							<div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+							<div className="mt-4 grid grid-cols-2 gap-4">
 								<div>
 									<p className="text-sm text-muted-foreground">Trainees</p>
 									<p className="text-lg font-semibold">{trainer.traineesCount}</p>
 								</div>
 								<div>
-									<p className="text-sm text-muted-foreground">Total Revenue</p>
-									<p className="text-lg font-semibold">${trainer.totalRevenue}</p>
-								</div>
-								<div>
-									<p className="text-sm text-muted-foreground">Plan</p>
-									<p className="text-lg font-semibold capitalize">{trainer.subscription.plan}</p>
-								</div>
-								<div>
 									<p className="text-sm text-muted-foreground">Joined</p>
-									<p className="text-lg font-semibold">{format(new Date(trainer.createdAt), "MMM dd, yyyy")}</p>
+									<p className="text-lg font-semibold">{format(new Date(trainer.createdAt), 'MMM dd, yyyy')}</p>
 								</div>
 							</div>
 						</div>
@@ -144,10 +118,8 @@ export default function TrainerDetails() {
 
 			{/* Tabs Section */}
 			<Tabs defaultValue="profile" className="w-full">
-				<TabsList className="grid w-full max-w-lg grid-cols-4">
+				<TabsList className="grid w-full max-w-lg grid-cols-2">
 					<TabsTrigger value="profile">Profile</TabsTrigger>
-					<TabsTrigger value="subscription">Subscription</TabsTrigger>
-					{/* <TabsTrigger value="payments">Payments</TabsTrigger> */}
 					<TabsTrigger value="trainees">Trainees</TabsTrigger>
 				</TabsList>
 
@@ -155,100 +127,39 @@ export default function TrainerDetails() {
 				<TabsContent value="profile" className="space-y-4">
 					<Card>
 						<CardHeader>
-							<CardTitle>Signup Details</CardTitle>
+							<CardTitle>Personal Information</CardTitle>
 						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<span className="text-sm font-medium text-muted-foreground">First Name</span>
-									<p className="text-foreground">{trainer.signupDetails.firstName}</p>
-								</div>
-								<div>
-									<span className="text-sm font-medium text-muted-foreground">Last Name</span>
-									<p className="text-foreground">{trainer.signupDetails.lastName}</p>
-								</div>
-								<div>
-									<span className="text-sm font-medium text-muted-foreground">Date of Birth</span>
-									<p className="text-foreground">
-										{format(new Date(trainer.signupDetails.dateOfBirth), "MMM dd, yyyy")}
-									</p>
-								</div>
-								<div>
-									<span className="text-sm font-medium text-muted-foreground">Gender</span>
-									<p className="text-foreground capitalize">{trainer.signupDetails.gender}</p>
-								</div>
-								<div>
-									<span className="text-sm font-medium text-muted-foreground">Experience</span>
-									<p className="text-foreground">{trainer.signupDetails.experience}</p>
-								</div>
-								<div>
-									<span className="text-sm font-medium text-muted-foreground">Location</span>
-									<p className="text-foreground">{trainer.signupDetails.location}</p>
-								</div>
-							</div>
-
-							<div>
-								<span className="text-sm font-medium text-muted-foreground">Specializations</span>
-								<div className="flex flex-wrap gap-2 mt-1">
-									{trainer.signupDetails.specialization.map((spec) => (
-										<Badge key={spec} variant="outline">
-											{spec}
-										</Badge>
-									))}
-								</div>
-							</div>
-
-							<div>
-								<span className="text-sm font-medium text-muted-foreground">Certifications</span>
-								<div className="flex flex-wrap gap-2 mt-1">
-									{trainer.signupDetails.certification.map((cert) => (
-										<Badge key={cert} variant="outline">
-											{cert}
-										</Badge>
-									))}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				{/* Subscription Tab */}
-				<TabsContent value="subscription" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Subscription Information</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-6">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 								<div className="space-y-4">
 									<div>
-										<span className="text-sm font-medium text-muted-foreground">Plan</span>
-										<p className="text-lg font-semibold capitalize">{trainer.subscription.plan}</p>
+										<span className="text-sm font-medium text-muted-foreground">First Name</span>
+										<p className="text-lg font-semibold">{trainer.signupDetails.firstName}</p>
+									</div>
+									<div>
+										<span className="text-sm font-medium text-muted-foreground">Last Name</span>
+										<p className="text-lg font-semibold">{trainer.signupDetails.lastName}</p>
+									</div>
+									<div>
+										<span className="text-sm font-medium text-muted-foreground">Email</span>
+										<p className="text-foreground">{trainer.email}</p>
 									</div>
 									<div>
 										<span className="text-sm font-medium text-muted-foreground">Status</span>
-										<Badge variant={trainer.subscription.status === "active" ? "default" : "secondary"}>
-											{trainer.subscription.status}
-										</Badge>
-									</div>
-									<div>
-										<span className="text-sm font-medium text-muted-foreground">Price</span>
-										<p className="text-lg font-semibold">
-											{trainer.subscription.price === 0 ? "Free" : `$${trainer.subscription.price}/year`}
-										</p>
+										<Badge variant={getStatusColor(trainer.status) as any}>{trainer.status}</Badge>
 									</div>
 								</div>
 
 								<div className="space-y-4">
 									<div>
-										<span className="text-sm font-medium text-muted-foreground">Start Date</span>
+										<span className="text-sm font-medium text-muted-foreground">Joined Date</span>
 										<p className="text-foreground">
-											{format(new Date(trainer.subscription.startDate), "MMM dd, yyyy")}
+											{format(new Date(trainer.createdAt), "MMM dd, yyyy")}
 										</p>
 									</div>
 									<div>
-										<span className="text-sm font-medium text-muted-foreground">End Date</span>
-										<p className="text-foreground">{format(new Date(trainer.subscription.endDate), "MMM dd, yyyy")}</p>
+										<span className="text-sm font-medium text-muted-foreground">Total Trainees</span>
+										<p className="text-foreground">{trainer.traineesCount}</p>
 									</div>
 								</div>
 							</div>
@@ -256,53 +167,9 @@ export default function TrainerDetails() {
 					</Card>
 				</TabsContent>
 
-				{/* Payments Tab */}
-				{/* <TabsContent value="payments" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Payment History</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{trainer.paymentHistory.length === 0 ? (
-								<div className="text-center py-8 text-muted-foreground">
-									<Icon icon="solar:card-bold-duotone" className="h-12 w-12 mx-auto mb-2 opacity-50" />
-									<p>No payment history available</p>
-								</div>
-							) : (
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead>Date</TableHead>
-											<TableHead>Description</TableHead>
-											<TableHead>Amount</TableHead>
-											<TableHead>Payment Method</TableHead>
-											<TableHead>Status</TableHead>
-											<TableHead>Transaction ID</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{trainer.paymentHistory.map((payment) => (
-											<TableRow key={payment.id}>
-												<TableCell>{format(new Date(payment.date), "MMM dd, yyyy")}</TableCell>
-												<TableCell>{payment.description}</TableCell>
-												<TableCell className="font-medium">${payment.amount}</TableCell>
-												<TableCell>{payment.paymentMethod}</TableCell>
-												<TableCell>
-													<Badge variant={getPaymentStatusColor(payment.status) as any}>{payment.status}</Badge>
-												</TableCell>
-												<TableCell className="font-mono text-sm">{payment.transactionId}</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-							)}
-						</CardContent>
-					</Card>
-				</TabsContent> */}
-
 				{/* Trainees Tab */}
 				<TabsContent value="trainees" className="space-y-4">
-					<TraineesTable 
+					<TraineesTable
 						trainees={trainerTrainees}
 						onAddTrainee={() => setAddTraineeDialogOpen(true)}
 						showAddButton={true}

@@ -1,11 +1,14 @@
 import { AnimatedDonutChart } from "@/components/dashboard/charts/animated-donut-chart";
 import { AnimatedBarChart } from "@/components/dashboard/charts/animated-bar-chart";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Icon } from "@/components/icon";
 import { Badge } from "@/ui/badge";
+
 import { Card, CardContent } from "@/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
 import { m } from "motion/react";
 import { mockDashboardStats, mockUserActivityData, mockProgramUsageData } from "@/mocks/dashboard";
-
+import { useState, useMemo } from "react";
 
 interface StatCardProps {
 	title: string;
@@ -61,7 +64,25 @@ export default function FitnessOverview() {
 	// Use mock data from mocks folder
 	const stats = mockDashboardStats;
 	const userActivityData = mockUserActivityData;
-	const programUsageData = mockProgramUsageData;
+
+	// Date range state for program usage filter
+	const [monthsToShow, setMonthsToShow] = useState("3");
+
+	// Filter program usage data based on selected months
+	const programUsageData = useMemo(() => {
+		const months = Number.parseInt(monthsToShow);
+		return mockProgramUsageData.slice(-months);
+	}, [monthsToShow]);
+
+	// Generate date range label
+	const dateRangeLabel = useMemo(() => {
+		const months = Number.parseInt(monthsToShow);
+		if (months === 12) return "Last 12 months";
+		if (months === 6) return "Last 6 months";
+		if (months === 3) return "Last 3 months";
+		if (months === 1) return "Last month";
+		return `Last ${months} months`;
+	}, [monthsToShow]);
 
 	const statCards: StatCardProps[] = [
 		{
@@ -107,12 +128,8 @@ export default function FitnessOverview() {
 
 	return (
 		<div className="flex flex-col gap-6 p-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-					<p className="text-muted-foreground">Fitness Solutions Admin Overview</p>
-				</div>
-			</div>
+			{/* Dashboard Header */}
+			<DashboardHeader />
 
 			{/* Stats Cards */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -131,8 +148,8 @@ export default function FitnessOverview() {
 							<h3 className="text-lg font-semibold">User Activity</h3>
 						</div>
 						<div className="h-auto flex items-center justify-center">
-							<AnimatedDonutChart 
-								title="User Activity Distribution" 
+							<AnimatedDonutChart
+								title="User Activity Distribution"
 								data={userActivityData}
 								centerValue={stats.totalUsers}
 								centerLabel="Total Users"
@@ -149,15 +166,25 @@ export default function FitnessOverview() {
 								<Icon icon="solar:chart-bold-duotone" className="text-primary" />
 								<h3 className="text-lg font-semibold">Program Usage</h3>
 							</div>
-							<Badge variant="secondary" className="text-xs">
-								Last 3 months
-							</Badge>
+							<div className="flex items-center gap-2">
+								<Badge variant="secondary" className="text-xs">
+									{dateRangeLabel}
+								</Badge>
+								<Select value={monthsToShow} onValueChange={setMonthsToShow}>
+									<SelectTrigger className="w-[140px] h-8">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="1">1 Month</SelectItem>
+										<SelectItem value="3">3 Months</SelectItem>
+										<SelectItem value="6">6 Months</SelectItem>
+										<SelectItem value="12">12 Months</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 						<div className="h-auto">
-							<AnimatedBarChart 
-								title="Monthly Program Usage" 
-								data={programUsageData} 
-							/>
+							<AnimatedBarChart title="Monthly Program Usage" data={programUsageData} />
 						</div>
 					</CardContent>
 				</Card>

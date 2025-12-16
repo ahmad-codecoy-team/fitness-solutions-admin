@@ -139,24 +139,6 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 										</div>
 									</TableHead>
 									<TableHead>Current Program</TableHead>
-									<TableHead
-										className="cursor-pointer hover:bg-muted/50"
-										onClick={() => handleSort("programsEnrolled")}
-									>
-										<div className="flex items-center gap-1">
-											Programs
-											<Icon icon={getSortIcon("programsEnrolled")} className="h-4 w-4" />
-										</div>
-									</TableHead>
-									<TableHead
-										className="cursor-pointer hover:bg-muted/50"
-										onClick={() => handleSort("completedWorkouts")}
-									>
-										<div className="flex items-center gap-1">
-											Workouts
-											<Icon icon={getSortIcon("completedWorkouts")} className="h-4 w-4" />
-										</div>
-									</TableHead>
 									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("createdAt")}>
 										<div className="flex items-center gap-1">
 											Joined
@@ -194,18 +176,6 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 											) : (
 												<span className="text-muted-foreground text-sm">No program</span>
 											)}
-										</TableCell>
-										<TableCell>
-											<div className="flex items-center gap-2">
-												<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4 text-muted-foreground" />
-												<span>{trainee.programsEnrolled}</span>
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="flex items-center gap-2">
-												<Icon icon="solar:dumbbell-small-bold-duotone" className="h-4 w-4 text-muted-foreground" />
-												<span>{trainee.completedWorkouts}</span>
-											</div>
 										</TableCell>
 										<TableCell>
 											<span className="text-sm">{format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>

@@ -77,158 +77,102 @@ export default function TraineeDetails() {
 				</div>
 			</div>
 
-			<div className="grid gap-6 lg:grid-cols-3">
-				{/* Main Information */}
-				<div className="lg:col-span-2 space-y-6">
-					{/* Basic Information */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Icon icon="solar:user-bold-duotone" />
-								Basic Information
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<div className="flex items-start gap-4">
-								<Avatar className="h-20 w-20">
-									<img
-										src={trainee.avatar || "/src/assets/images/avatars/avatar-4.png"}
-										alt={trainee.name}
-										className="object-cover"
-									/>
-								</Avatar>
-								<div className="flex-1">
-									<div className="flex items-center gap-3 mb-2">
-										<h2 className="text-2xl font-bold">{trainee.name}</h2>
-										{getStatusBadge(trainee.status)}
+			{/* Main Information */}
+			<div className="space-y-6">
+				{/* Basic Information */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Icon icon="solar:user-bold-duotone" />
+							Basic Information
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="space-y-6">
+						<div className="flex items-start gap-4">
+							<Avatar className="h-20 w-20">
+								<img
+									src={trainee.avatar || "/src/assets/images/avatars/avatar-4.png"}
+									alt={trainee.name}
+									className="object-cover"
+								/>
+							</Avatar>
+							<div className="flex-1">
+								<div className="flex items-center gap-3 mb-2">
+									<h2 className="text-2xl font-bold">{trainee.name}</h2>
+									{getStatusBadge(trainee.status)}
+								</div>
+								<div className="grid gap-3 md:grid-cols-2">
+									<div className="flex items-center gap-2 text-muted-foreground">
+										<Icon icon="solar:letter-bold-duotone" className="h-4 w-4" />
+										<span>{trainee.email}</span>
 									</div>
-									<div className="grid gap-3 md:grid-cols-2">
+									{trainee.phone && (
 										<div className="flex items-center gap-2 text-muted-foreground">
-											<Icon icon="solar:letter-bold-duotone" className="h-4 w-4" />
-											<span>{trainee.email}</span>
+											<Icon icon="solar:phone-bold-duotone" className="h-4 w-4" />
+											<span>{trainee.phone}</span>
 										</div>
-										{trainee.phone && (
-											<div className="flex items-center gap-2 text-muted-foreground">
-												<Icon icon="solar:phone-bold-duotone" className="h-4 w-4" />
-												<span>{trainee.phone}</span>
-											</div>
-										)}
-										{trainee.gender && (
-											<div className="flex items-center gap-2 text-muted-foreground">
-												<Icon icon={getGenderIcon(trainee.gender)} className="h-4 w-4" />
-												<span className="capitalize">{trainee.gender}</span>
-											</div>
-										)}
+									)}
+									{trainee.gender && (
 										<div className="flex items-center gap-2 text-muted-foreground">
-											<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4" />
-											<span>Joined {format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>
+											<Icon icon={getGenderIcon(trainee.gender)} className="h-4 w-4" />
+											<span className="capitalize">{trainee.gender}</span>
 										</div>
+									)}
+									<div className="flex items-center gap-2 text-muted-foreground">
+										<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4" />
+										<span>Joined {format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>
 									</div>
 								</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</CardContent>
+				</Card>
 
-					{/* Trainer Information */}
+				{/* Trainer Information */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Icon icon="solar:user-check-bold-duotone" />
+							Assigned Trainer
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex items-center gap-3">
+							<Icon icon="solar:user-bold-duotone" className="h-10 w-10 text-primary" />
+							<div>
+								<h3 className="font-semibold">{trainee.trainerName}</h3>
+								<p className="text-sm text-muted-foreground">Personal Trainer</p>
+							</div>
+							<div className="ml-auto">
+								<Button variant="outline" size="sm" onClick={() => navigate(`/users/trainer/${trainee.trainerId}`)}>
+									<Icon icon="solar:eye-bold-duotone" className="h-4 w-4 mr-2" />
+									View Trainer
+								</Button>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Current Program */}
+				{trainee.currentProgram && (
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<Icon icon="solar:user-check-bold-duotone" />
-								Assigned Trainer
+								<Icon icon="solar:clipboard-list-bold-duotone" />
+								Current Program
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="flex items-center gap-3">
-								<Icon icon="solar:user-bold-duotone" className="h-10 w-10 text-primary" />
+								<Icon icon="solar:dumbbell-small-bold-duotone" className="h-10 w-10 text-primary" />
 								<div>
-									<h3 className="font-semibold">{trainee.trainerName}</h3>
-									<p className="text-sm text-muted-foreground">Personal Trainer</p>
-								</div>
-								<div className="ml-auto">
-									<Button variant="outline" size="sm" onClick={() => navigate(`/users/trainer/${trainee.trainerId}`)}>
-										<Icon icon="solar:eye-bold-duotone" className="h-4 w-4 mr-2" />
-										View Trainer
-									</Button>
+									<h3 className="font-semibold">{trainee.currentProgram}</h3>
+									<p className="text-sm text-muted-foreground">Active fitness program</p>
 								</div>
 							</div>
 						</CardContent>
 					</Card>
-
-					{/* Current Program */}
-					{trainee.currentProgram && (
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<Icon icon="solar:clipboard-list-bold-duotone" />
-									Current Program
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="flex items-center gap-3">
-									<Icon icon="solar:dumbbell-small-bold-duotone" className="h-10 w-10 text-primary" />
-									<div>
-										<h3 className="font-semibold">{trainee.currentProgram}</h3>
-										<p className="text-sm text-muted-foreground">Active fitness program</p>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					)}
-				</div>
-
-				{/* Statistics Sidebar */}
-				<div className="space-y-6">
-					{/* Progress Stats */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Icon icon="solar:chart-bold-duotone" />
-								Progress Statistics
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-								<div className="flex items-center gap-2">
-									<Icon icon="solar:calendar-bold-duotone" className="h-5 w-5 text-primary" />
-									<span className="text-sm font-medium">Programs Enrolled</span>
-								</div>
-								<span className="text-xl font-bold">{trainee.programsEnrolled}</span>
-							</div>
-
-							<div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-								<div className="flex items-center gap-2">
-									<Icon icon="solar:dumbbell-small-bold-duotone" className="h-5 w-5 text-primary" />
-									<span className="text-sm font-medium">Completed Workouts</span>
-								</div>
-								<span className="text-xl font-bold">{trainee.completedWorkouts}</span>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Quick Actions - We may need it later - disabled for now */}
-					{/* <Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Icon icon="solar:settings-bold-duotone" />
-								Quick Actions
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-3">
-							<Button variant="outline" className="w-full justify-start">
-								<Icon icon="solar:pen-bold-duotone" className="h-4 w-4 mr-2" />
-								Edit Information
-							</Button>
-							<Button variant="outline" className="w-full justify-start">
-								<Icon icon="solar:calendar-add-bold-duotone" className="h-4 w-4 mr-2" />
-								Assign Program
-							</Button>
-							<Button variant="outline" className="w-full justify-start">
-								<Icon icon="solar:chart-2-bold-duotone" className="h-4 w-4 mr-2" />
-								View Progress
-							</Button>
-						</CardContent>
-					</Card> */}
-				</div>
+				)}
 			</div>
 		</div>
 	);

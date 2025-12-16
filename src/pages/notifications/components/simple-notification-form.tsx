@@ -4,8 +4,13 @@ import { Button } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Label } from "@/ui/label";
 import { Textarea } from "@/ui/textarea";
-import { useState } from "react";
+import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
+import { Input } from "@/ui/input";
+import { Checkbox } from "@/ui/checkbox";
+import { Badge } from "@/ui/badge";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { mockTrainers, mockTrainees } from "@/mocks/users";
 
 interface SimpleNotificationFormProps {
 	onSubmit: (data: CreateNotificationRequest) => Promise<void>;
@@ -17,6 +22,56 @@ interface SimpleNotificationFormProps {
 export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: SimpleNotificationFormProps) {
 	const [announcement, setAnnouncement] = useState("");
 	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [recipientType, setRecipientType] = useState<"all" | "specific">("all");
+	const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+	const [searchQuery, setSearchQuery] = useState("");
+
+	// Combine all users (trainers + trainees)
+	const allUsers = useMemo(() => {
+		const trainers = mockTrainers.map(t => ({
+			id: t.id,
+			name: t.name,
+			email: t.email,
+			type: "Trainer" as const,
+			status: t.status
+		}));
+		const trainees = mockTrainees.map(t => ({
+			id: t.id,
+			name: t.name,
+			email: t.email,
+			type: "Trainee" as const,
+			status: t.status
+		}));
+		return [...trainers, ...trainees];
+	}, []);
+
+	// Filter users based on search query
+	const filteredUsers = useMemo(() => {
+		if (!searchQuery.trim()) return allUsers;
+		const query = searchQuery.toLowerCase();
+		return allUsers.filter(user => 
+			user.name.toLowerCase().includes(query) ||
+			user.email.toLowerCase().includes(query)
+		);
+	}, [allUsers, searchQuery]);
+
+	// Handle select all
+	const handleSelectAll = (checked: boolean) => {
+		if (checked) {
+			setSelectedUserIds(filteredUsers.map(u => u.id));
+		} else {
+			setSelectedUserIds([]);
+		}
+	};
+
+	// Handle individual user selection
+	const handleUserToggle = (userId: string, checked: boolean) => {
+		if (checked) {
+			setSelectedUserIds(prev => [...prev, userId]);
+		} else {
+			setSelectedUserIds(prev => prev.filter(id => id !== userId));
+		}
+	};
 
 	const validateForm = () => {
 		const newErrors: Record<string, string> = {};
@@ -33,6 +88,10 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 			newErrors.announcement = "Announcement must be less than 500 characters";
 		}
 
+		if (recipientType === "specific" && selectedUserIds.length === 0) {
+			newErrors.recipients = "Please select at least one user";
+		}
+
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
@@ -46,13 +105,13 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 		}
 
 		try {
-			// Create a simple data object that matches CreateNotificationRequest
 			const submitData: CreateNotificationRequest = {
 				type: "admin_message" as any,
 				title: "Admin Announcement",
 				message: announcement.trim(),
 				target: {
-					type: "all_users" as any,
+					type: recipientType === "all" ? "all_users" as any : "custom_users" as any,
+					userIds: recipientType === "specific" ? selectedUserIds : undefined,
 				},
 			};
 
@@ -63,6 +122,9 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 		}
 	};
 
+	const selectedCount = selectedUserIds.length;
+	const isAllSelected = filteredUsers.length > 0 && selectedUserIds.length === filteredUsers.length;
+
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<Card>
@@ -71,7 +133,7 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 						{mode === "create" ? "Create New Announcement" : "Edit Announcement"}
 					</CardTitle>
 					<p className="text-muted-foreground">
-						Send a push notification announcement to all app users
+						Send a push notification announcement to app users
 					</p>
 				</CardHeader>
 				<CardContent className="space-y-6">
@@ -85,7 +147,6 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 							value={announcement}
 							onChange={(e) => {
 								setAnnouncement(e.target.value);
-								// Clear error when user starts typing
 								if (errors.announcement) {
 									setErrors((prev) => ({ ...prev, announcement: "" }));
 								}
@@ -102,6 +163,116 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 						</p>
 					</div>
 
+					{/* Recipient Selection */}
+					<div className="space-y-4">
+						<Label className="text-foreground">Recipients *</Label>
+						<RadioGroup value={recipientType} onValueChange={(value: "all" | "specific") => {
+							setRecipientType(value);
+							if (errors.recipients) {
+								setErrors((prev) => ({ ...prev, recipients: "" }));
+							}
+						}}>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="all" id="all" />
+								<Label htmlFor="all" className="font-normal cursor-pointer">
+									All Users ({allUsers.length})
+								</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="specific" id="specific" />
+								<Label htmlFor="specific" className="font-normal cursor-pointer">
+									Specific Users
+								</Label>
+							</div>
+						</RadioGroup>
+
+						{/* User Selection List */}
+						{recipientType === "specific" && (
+							<div className="space-y-3">
+								{/* Search */}
+								<div className="relative">
+									<Icon 
+										icon="solar:magnifer-bold-duotone" 
+										className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+									/>
+									<Input
+										placeholder="Search users by name or email..."
+										value={searchQuery}
+										onChange={(e) => setSearchQuery(e.target.value)}
+										className="pl-9"
+									/>
+								</div>
+
+								{/* Select All */}
+								<div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+									<div className="flex items-center space-x-2">
+										<Checkbox
+											id="select-all"
+											checked={isAllSelected}
+											onCheckedChange={handleSelectAll}
+										/>
+										<Label htmlFor="select-all" className="font-medium cursor-pointer">
+											Select All
+										</Label>
+									</div>
+									<Badge variant="secondary">
+										{selectedCount} selected
+									</Badge>
+								</div>
+
+								{/* User List */}
+								<div className="border rounded-lg max-h-[300px] overflow-y-auto">
+									{filteredUsers.length === 0 ? (
+										<div className="p-8 text-center text-muted-foreground">
+											<Icon icon="solar:users-group-rounded-bold-duotone" className="h-12 w-12 mx-auto mb-2 opacity-50" />
+											<p>No users found</p>
+										</div>
+									) : (
+										<div className="divide-y">
+											{filteredUsers.map((user) => (
+												<div
+													key={user.id}
+													className="flex items-center space-x-3 p-3 hover:bg-muted/50 transition-colors"
+												>
+													<Checkbox
+														id={user.id}
+														checked={selectedUserIds.includes(user.id)}
+														onCheckedChange={(checked) => handleUserToggle(user.id, checked as boolean)}
+													/>
+													<Label
+														htmlFor={user.id}
+														className="flex-1 cursor-pointer"
+													>
+														<div className="flex items-center justify-between">
+															<div>
+																<p className="font-medium">{user.name}</p>
+																<p className="text-sm text-muted-foreground">{user.email}</p>
+															</div>
+															<div className="flex items-center gap-2">
+																<Badge variant="outline" className="text-xs">
+																	{user.type}
+																</Badge>
+																{user.status === "inactive" && (
+																	<Badge variant="secondary" className="text-xs">
+																		Inactive
+																	</Badge>
+																)}
+															</div>
+														</div>
+													</Label>
+												</div>
+											))}
+										</div>
+									)}
+								</div>
+
+								{errors.recipients && (
+									<p className="text-sm text-destructive">{errors.recipients}</p>
+								)}
+							</div>
+						)}
+					</div>
+
 					{/* Info Box */}
 					<div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 						<div className="flex items-start space-x-3">
@@ -114,9 +285,19 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 									Announcement Details
 								</p>
 								<ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-									<li>• This will be sent to all app users</li>
-									<li>• Users will receive a push notification</li>
-									<li>• The announcement will be visible in the app</li>
+									{recipientType === "all" ? (
+										<>
+											<li>• This will be sent to all app users ({allUsers.length} users)</li>
+											<li>• Users will receive a push notification</li>
+											<li>• The announcement will be visible in the app</li>
+										</>
+									) : (
+										<>
+											<li>• This will be sent to {selectedCount} selected user{selectedCount !== 1 ? 's' : ''}</li>
+											<li>• Selected users will receive a push notification</li>
+											<li>• The announcement will be visible in the app</li>
+										</>
+									)}
 								</ul>
 							</div>
 						</div>

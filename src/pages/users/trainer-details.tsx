@@ -43,8 +43,6 @@ export default function TrainerDetails() {
 		switch (status) {
 			case "active":
 				return "default";
-			case "suspended":
-				return "destructive";
 			case "inactive":
 				return "secondary";
 			default:
@@ -88,15 +86,15 @@ export default function TrainerDetails() {
 								<div className="flex items-center gap-2">
 									<Badge variant={getStatusColor(trainer.status) as any}>{trainer.status}</Badge>
 									<Button
-										variant={trainer.status === "suspended" ? "default" : "destructive"}
+										variant={trainer.status === "inactive" ? "default" : "destructive"}
 										size="sm"
 										onClick={handleToggleStatus}
 									>
 										<Icon
-											icon={trainer.status === "suspended" ? "solar:play-bold-duotone" : "solar:pause-bold-duotone"}
+											icon={trainer.status === "inactive" ? "solar:play-bold-duotone" : "solar:pause-bold-duotone"}
 											className="h-4 w-4 mr-1"
 										/>
-										{trainer.status === "suspended" ? "Activate" : "Suspend"}
+										{trainer.status === "inactive" ? "Activate" : "Deactivate"}
 									</Button>
 								</div>
 							</div>

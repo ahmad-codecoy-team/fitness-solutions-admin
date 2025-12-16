@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
 import { mockNotifications, type Notification } from "@/mocks/notifications";
 import { SimpleNotificationForm } from "./components/simple-notification-form";
+import { NotificationDetailDialog } from "./components/notification-detail-dialog";
 import type { CreateNotificationRequest } from "@/types/notification";
 import { toast } from "sonner";
 
@@ -16,6 +17,8 @@ export default function NotificationsManagement() {
 	const [notifications] = useState(mockNotifications);
 	const [isLoading, setIsLoading] = useState(false);
 	const [formKey, setFormKey] = useState(Date.now());
+	const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+	const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
 	const handleCreateNotification = async (data: CreateNotificationRequest) => {
 		setIsLoading(true);
@@ -48,6 +51,16 @@ export default function NotificationsManagement() {
 		if (window.confirm("Clear the form?")) {
 			setFormKey(Date.now());
 		}
+	};
+
+	const handleViewNotification = (notification: Notification) => {
+		setSelectedNotification(notification);
+		setDetailDialogOpen(true);
+	};
+
+	const handleCloseDetail = () => {
+		setDetailDialogOpen(false);
+		setTimeout(() => setSelectedNotification(null), 300);
 	};
 
 	const getTypeIcon = (type: string) => {
@@ -165,39 +178,32 @@ export default function NotificationsManagement() {
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Title</TableHead>
-										<TableHead>Type</TableHead>
+										<TableHead>Notification</TableHead>
 										<TableHead>Recipients</TableHead>
-										<TableHead>Status</TableHead>
 										<TableHead>Date</TableHead>
 										<TableHead>Actions</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
 									{notifications.map((notification) => (
-										<TableRow key={notification.id}>
+										<TableRow key={notification.id} className="hover:bg-muted/50">
 											<TableCell>
-												<div>
-													<div className="font-medium">{notification.title}</div>
-													<div className="text-sm text-muted-foreground truncate max-w-xs">
-														{notification.message}
-													</div>
-												</div>
-											</TableCell>
-											<TableCell>
-												<Badge variant={getTypeColor(notification.type) as any} className="flex items-center gap-1 w-fit">
-													<Icon icon={getTypeIcon(notification.type)} className="h-3 w-3" />
-													{notification.type}
-												</Badge>
-											</TableCell>
+  <button
+    type="button"
+    onClick={() => handleViewNotification(notification)}
+    className="text-left hover:underline focus:outline-none w-full"
+  >
+    <div className="font-medium text-primary cursor-pointer">{notification.title}</div>
+    <div className="text-sm text-muted-foreground truncate max-w-md">
+      {notification.message}
+    </div>
+  </button>
+</TableCell>
+										
 											<TableCell>
 												{getRecipientsBadge(notification.recipients, notification.recipientCount)}
 											</TableCell>
-											<TableCell>
-												<Badge variant={getStatusColor(notification.status) as any}>
-													{notification.status}
-												</Badge>
-											</TableCell>
+											
 											<TableCell>
 												<div className="text-sm">
 													<div>
@@ -219,9 +225,13 @@ export default function NotificationsManagement() {
 												</div>
 											</TableCell>
 											<TableCell>
-												<Button variant="ghost" size="sm">
-													<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
-												</Button>
+												<Button 
+  variant="ghost" 
+  size="sm"
+  onClick={() => handleViewNotification(notification)}
+>
+  <Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
+</Button>
 											</TableCell>
 										</TableRow>
 									))}
@@ -231,6 +241,13 @@ export default function NotificationsManagement() {
 					</Card>
 				</TabsContent>
 			</Tabs>
+
+			{/* Notification Detail Dialog */}
+			<NotificationDetailDialog
+				notification={selectedNotification}
+				open={detailDialogOpen}
+				onClose={handleCloseDetail}
+			/>
 		</div>
 	);
 }

@@ -3,7 +3,7 @@ export interface Trainer {
 	name: string;
 	email: string;
 	avatar?: string;
-	status: "active" | "suspended" | "inactive";
+	status: "active" | "inactive";
 	createdAt: string;
 	traineesCount: number;
 	signupDetails: {
@@ -71,7 +71,7 @@ export const mockTrainers: Trainer[] = [
 		name: "Michael Brown",
 		email: "michael.brown@example.com",
 		avatar: "/avatar-3.png",
-		status: "suspended",
+		status: "inactive",
 		createdAt: "2024-03-05T09:20:00Z",
 		traineesCount: 5,
 		signupDetails: {

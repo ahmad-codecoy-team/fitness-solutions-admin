@@ -1,59 +1,74 @@
+import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
+
 import { Icon } from "@/components/icon";
 import { Card } from "@/ui/card";
 
-export function DashboardHeader() {
+type DashboardHeaderProps = {
+	userLabel?: string; // e.g. "Admin"
+	orgName?: string;   // e.g. "Wilderness Scout Ministries"
+};
+
+export function DashboardHeader({
+	userLabel = "Admin",
+	orgName = "Wilderness Scout Ministries",
+}: DashboardHeaderProps) {
+	const [now, setNow] = useState(() => dayjs());
+
+	useEffect(() => {
+		const id = setInterval(() => setNow(dayjs()), 1000);
+		return () => clearInterval(id);
+	}, []);
+
+	const greeting = useMemo(() => {
+		const h = now.hour();
+		if (h >= 5 && h < 12) return "Good Morning";
+		if (h >= 12 && h < 17) return "Good Afternoon";
+		return "Good Night";
+	}, [now]);
+
+	const dateText = now.format("dddd, MMMM D, YYYY");
+	const timeText = now.format("hh:mm:ss A");
+
 	return (
 		<Card className="relative overflow-hidden">
-			<div className="relative p-6 md:p-8">
-				{/* Background Pattern/Gradient */}
-				<div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
-				
-				{/* Content */}
-				<div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-					{/* Left Section - Welcome Message */}
-					<div className="flex-1">
-						<div className="flex items-center gap-3 mb-2">
-							<div className="p-2 bg-primary/10 rounded-lg">
-								<Icon 
-									icon="solar:dumbbell-large-minimalistic-bold-duotone" 
+			{/* Background covers the entire card */}
+			<div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
+
+			{/* Content layer */}
+			<div className="relative z-10 p-6 md:p-8">
+				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+					{/* Left */}
+					<div className="flex-1 min-w-0">
+						<div className="flex items-start gap-4">
+							<div className="p-2 bg-primary/10 rounded-lg shrink-0">
+								<Icon
+									icon="solar:shield-check-bold-duotone"
 									className="h-8 w-8 text-primary"
 								/>
 							</div>
-							<div>
-								<h1 className="text-2xl md:text-3xl font-bold text-foreground">
-									Fitness Solutions Admin
+
+							<div className="min-w-0">
+								<h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
+									{greeting}, {userLabel}
 								</h1>
-								<p className="text-sm text-muted-foreground">
-									Manage your fitness platform with ease
+								<p className="mt-1 text-sm md:text-base text-muted-foreground">
+									Welcome to {orgName} Admin Dashboard
 								</p>
 							</div>
 						</div>
 					</div>
 
-					{/* Right Section - Quick Stats */}
-					<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-						<div className="p-4 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50">
-							<div className="flex items-center gap-2 mb-1">
-								<Icon icon="solar:users-group-rounded-bold-duotone" className="h-4 w-4 text-primary" />
-								<span className="text-xs font-medium text-muted-foreground">Total Users</span>
+					{/* Right */}
+					<div className="flex md:justify-end">
+						<div className="rounded-xl border border-border/50 bg-background/80 backdrop-blur-sm px-4 py-3 md:px-5 md:py-4">
+							<div className="flex items-center md:justify-end gap-2 text-muted-foreground">
+								<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4" />
+								<span className="text-sm font-medium">{dateText}</span>
 							</div>
-							<p className="text-2xl font-bold text-foreground">1,250</p>
-						</div>
-
-						<div className="p-4 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50">
-							<div className="flex items-center gap-2 mb-1">
-								<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4 text-primary" />
-								<span className="text-xs font-medium text-muted-foreground">Programs</span>
+							<div className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-primary">
+								{timeText}
 							</div>
-							<p className="text-2xl font-bold text-foreground">85</p>
-						</div>
-
-						<div className="hidden md:block p-4 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50">
-							<div className="flex items-center gap-2 mb-1">
-								<Icon icon="solar:check-circle-bold-duotone" className="h-4 w-4 text-green-500" />
-								<span className="text-xs font-medium text-muted-foreground">Active</span>
-							</div>
-							<p className="text-2xl font-bold text-foreground">938</p>
 						</div>
 					</div>
 				</div>

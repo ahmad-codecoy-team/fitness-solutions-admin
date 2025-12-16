@@ -21,6 +21,15 @@ export const frontendDashboardRoutes: RouteObject[] = [
 			{ path: ":id/edit", element: Component("/pages/notifications/edit") },
 		],
 	},
+	{
+		path: "exercises",
+		children: [
+			{ index: true, element: Component("/pages/exercises") },
+			{ path: "new", element: Component("/pages/exercises/create") },
+			{ path: ":id/edit", element: Component("/pages/exercises/edit") },
+		],
+	},
+	{ path: "financial", element: Component("/pages/financial") },
 	{ path: "terms-and-conditions", element: Component("/pages/terms-and-conditions") },
 	{ path: "privacy-policy", element: Component("/pages/privacy-policy") },
 	{ path: "about-us", element: Component("/pages/about-us") },

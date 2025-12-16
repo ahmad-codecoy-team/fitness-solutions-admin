@@ -25,6 +25,16 @@ export const frontendNavData: NavProps["data"] = [
 				path: "/notifications",
 				icon: <Icon icon="solar:bell-bold-duotone" size="24" />,
 			},
+			{
+				title: "Exercises",
+				path: "/exercises",
+				icon: <Icon icon="solar:dumbbell-bold-duotone" size="24" />,
+			},
+			{
+				title: "Financial",
+				path: "/financial",
+				icon: <Icon icon="solar:card-send-bold-duotone" size="24" />,
+			},
 		],
 	},
 	{

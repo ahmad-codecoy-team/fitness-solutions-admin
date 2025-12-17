@@ -9,10 +9,7 @@ type DashboardHeaderProps = {
 	orgName?: string; // e.g. "Wilderness Scout Ministries"
 };
 
-export function DashboardHeader({
-	userLabel = "Admin",
-	orgName = "Wilderness Scout Ministries",
-}: DashboardHeaderProps) {
+export function DashboardHeader({ userLabel = "Admin", orgName = "Fitness Solutions" }: DashboardHeaderProps) {
 	const [now, setNow] = useState(() => dayjs());
 
 	useEffect(() => {

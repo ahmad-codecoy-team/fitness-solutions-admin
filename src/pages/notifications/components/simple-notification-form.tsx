@@ -4,7 +4,6 @@ import { Button } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Label } from "@/ui/label";
 import { Textarea } from "@/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
 import { Input } from "@/ui/input";
 import { Checkbox } from "@/ui/checkbox";
 import { Badge } from "@/ui/badge";
@@ -22,7 +21,6 @@ interface SimpleNotificationFormProps {
 export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: SimpleNotificationFormProps) {
 	const [announcement, setAnnouncement] = useState("");
 	const [errors, setErrors] = useState<Record<string, string>>({});
-	const [recipientType, setRecipientType] = useState<"all" | "specific">("all");
 	const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -88,7 +86,7 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 			newErrors.announcement = "Announcement must be less than 500 characters";
 		}
 
-		if (recipientType === "specific" && selectedUserIds.length === 0) {
+		if (selectedUserIds.length === 0) {
 			newErrors.recipients = "Please select at least one user";
 		}
 
@@ -110,8 +108,8 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 				title: "Admin Announcement",
 				message: announcement.trim(),
 				target: {
-					type: recipientType === "all" ? "all_users" as any : "custom_users" as any,
-					userIds: recipientType === "specific" ? selectedUserIds : undefined,
+					type: "custom_users" as any,
+					userIds: selectedUserIds,
 				},
 			};
 
@@ -163,31 +161,11 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 						</p>
 					</div>
 
-					{/* Recipient Selection */}
+					{/* User Selection */}
 					<div className="space-y-4">
-						<Label className="text-foreground">Recipients *</Label>
-						<RadioGroup value={recipientType} onValueChange={(value: "all" | "specific") => {
-							setRecipientType(value);
-							if (errors.recipients) {
-								setErrors((prev) => ({ ...prev, recipients: "" }));
-							}
-						}}>
-							<div className="flex items-center space-x-2">
-								<RadioGroupItem value="all" id="all" />
-								<Label htmlFor="all" className="font-normal cursor-pointer">
-									All Users ({allUsers.length})
-								</Label>
-							</div>
-							<div className="flex items-center space-x-2">
-								<RadioGroupItem value="specific" id="specific" />
-								<Label htmlFor="specific" className="font-normal cursor-pointer">
-									Specific Users
-								</Label>
-							</div>
-						</RadioGroup>
-
-						{/* User Selection List */}
-						{recipientType === "specific" && (
+						<Label className="text-foreground">Select Users *</Label>
+						
+						{/* User Selection List - Always visible */}
 							<div className="space-y-3">
 								{/* Search */}
 								<div className="relative">
@@ -270,7 +248,6 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 									<p className="text-sm text-destructive">{errors.recipients}</p>
 								)}
 							</div>
-						)}
 					</div>
 
 					{/* Info Box */}
@@ -285,19 +262,9 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 									Announcement Details
 								</p>
 								<ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-									{recipientType === "all" ? (
-										<>
-											<li>• This will be sent to all app users ({allUsers.length} users)</li>
-											<li>• Users will receive a push notification</li>
-											<li>• The announcement will be visible in the app</li>
-										</>
-									) : (
-										<>
-											<li>• This will be sent to {selectedCount} selected user{selectedCount !== 1 ? 's' : ''}</li>
-											<li>• Selected users will receive a push notification</li>
-											<li>• The announcement will be visible in the app</li>
-										</>
-									)}
+									<li>• This will be sent to {selectedCount} selected user{selectedCount !== 1 ? 's' : ''}</li>
+									<li>• Selected users will receive a push notification</li>
+									<li>• The announcement will be visible in the app</li>
 								</ul>
 							</div>
 						</div>

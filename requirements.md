@@ -1,6 +1,4 @@
 # Client Requirements
 
-1. Build a section in the Admin Panel that allows  to add new exercises and edit every detail of the existing ones.
-
-2. Create a section to track money, subscriptions, and payments from trainers.(UI purpose)
-Subscription Status and Paid Amount (for the month) columns for trainers
+1. In notifications page, no need for seperate radio buttons to select all or specific user. we already have 'select all' checkbox when click on specific users radio btn. so direclty show list of all users with search box and select all checkbox, that's it.
+2. In overview page, desktop header have redish bg, it should have main primary bg which is purple type, code is "#5942d9". this should be the primary color set in theme.

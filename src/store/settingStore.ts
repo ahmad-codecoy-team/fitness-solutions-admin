@@ -30,7 +30,7 @@ const useSettingStore = create<SettingStore>()(
 	persist(
 		(set) => ({
 			settings: {
-				themeColorPresets: ThemeColorPresets.Red,
+				themeColorPresets: ThemeColorPresets.Default,
 				themeMode: ThemeMode.Dark,
 				themeLayout: ThemeLayout.Vertical,
 				themeStretch: true,

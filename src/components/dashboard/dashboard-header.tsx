@@ -6,7 +6,7 @@ import { Card } from "@/ui/card";
 
 type DashboardHeaderProps = {
 	userLabel?: string; // e.g. "Admin"
-	orgName?: string;   // e.g. "Wilderness Scout Ministries"
+	orgName?: string; // e.g. "Wilderness Scout Ministries"
 };
 
 export function DashboardHeader({
@@ -33,7 +33,7 @@ export function DashboardHeader({
 	return (
 		<Card className="relative overflow-hidden">
 			{/* Background covers the entire card */}
-			<div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
+			<div className="absolute inset-0 bg-linear-to-r from-primary/15 via-primary/10 to-transparent" />
 
 			{/* Content layer */}
 			<div className="relative z-10 p-6 md:p-8">
@@ -42,19 +42,14 @@ export function DashboardHeader({
 					<div className="flex-1 min-w-0">
 						<div className="flex items-start gap-4">
 							<div className="p-2 bg-primary/10 rounded-lg shrink-0">
-								<Icon
-									icon="solar:shield-check-bold-duotone"
-									className="h-8 w-8 text-primary"
-								/>
+								<Icon icon="solar:shield-check-bold-duotone" className="h-8 w-8 text-primary" />
 							</div>
 
 							<div className="min-w-0">
 								<h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
 									{greeting}, {userLabel}
 								</h1>
-								<p className="mt-1 text-sm md:text-base text-muted-foreground">
-									Welcome to {orgName} Admin Dashboard
-								</p>
+								<p className="mt-1 text-sm md:text-base text-muted-foreground">Welcome to {orgName} Admin Dashboard</p>
 							</div>
 						</div>
 					</div>
@@ -66,9 +61,7 @@ export function DashboardHeader({
 								<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4" />
 								<span className="text-sm font-medium">{dateText}</span>
 							</div>
-							<div className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-primary">
-								{timeText}
-							</div>
+							<div className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-primary">{timeText}</div>
 						</div>
 					</div>
 				</div>

@@ -8,12 +8,12 @@ export default function ExercisesPage() {
 				<title>Exercises - Fitness Solutions Admin</title>
 			</Helmet>
 
-            <div className="flex items-center justify-between">
-                <div>
+			<div className="flex items-center justify-between">
+				<div>
 					<h1 className="text-3xl font-bold text-foreground">Exercises Management</h1>
 					<p className="text-muted-foreground">Add new exercises and edit every detail of the existing ones.</p>
 				</div>
-            </div>
+			</div>
 
 			<ExercisesTable />
 		</div>

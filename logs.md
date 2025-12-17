@@ -1,5 +1,25 @@
-## Tokens logs
-
-=== TOKEN DEBUG ===
-Tmp*rovodev_debug_tokens.tsx:12 Current token: {accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y…vbSJ9.d9mn3q2rBI_SJP2_cZOKRaPSNZvy0S774f7uktcOiYg', refreshToken: undefined}accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YTQxYWE2OWI0NDZjZDA4NjUxYWU4MiIsInJvbGUiOiJhZG1pbiIsImlzQWN0aXZlIjp0cnVlLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NjU0NTQ4ODEsImV4cCI6MTc5NzAxMjQ4MSwiYXVkIjoicm9vdCIsImlzcyI6ImFkbWluQGFkbWluLmNvbSIsInN1YiI6ImFkbWluQGFkbWluLmNvbSJ9.d9mn3q2rBI_SJP2_cZOKRaPSNZvy0S774f7uktcOiYg"refreshToken: undefined[[Prototype]]: Object
-Tmp_rovodev_debug_tokens.tsx:13 localStorage userStore: {"state":{"userInfo":{"location":{"type":"Point","coordinates":[0,0]},"city":null,"\_id":"68a41aa69b446cd08651ae82","image":"1755584513464-download*(1).jpeg","fullname":"admin","email":"admin@admin.com","password":"$2b$12$l6PzL33hPJTvfY80.6OvPe3gnZxg6pHv1.fHBp5NeT4kbZKUTsh3u","phoneNo":"+92300000000","role":{"\_id":"68a2cdccf92bff64b43b6310","name":"admin","createdAt":"2025-08-18T06:53:00.965Z","updatedAt":"2025-08-18T06:53:00.965Z","**v":0},"isActive":true,"isProfileCompleted":false,"notifications":true,"firebaseId":"","accountType":"email","subscriptionType":"free","subscriptionDate":null,"subscriptionExpiryDate":null,"createdAt":"2025-08-19T06:33:10.761Z","updatedAt":"2025-08-19T06:33:10.761Z","**v":0},"userToken":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YTQxYWE2OWI0NDZjZDA4NjUxYWU4MiIsInJvbGUiOiJhZG1pbiIsImlzQWN0aXZlIjp0cnVlLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NjU0NTQ4ODEsImV4cCI6MTc5NzAxMjQ4MSwiYXVkIjoicm9vdCIsImlzcyI6ImFkbWluQGFkbWluLmNvbSIsInN1YiI6ImFkbWluQGFkbWluLmNvbSJ9.d9mn3q2rBI_SJP2_cZOKRaPSNZvy0S774f7uktcOiYg"}},"version":0}
+POST http://localhost:3000/api/v1/exercise/bulk-import 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=e6c2514b:1696
+xhr @ axios.js?v=e6c2514b:1573
+dispatchRequest @ axios.js?v=e6c2514b:2107
+_request @ axios.js?v=e6c2514b:2327
+request @ axios.js?v=e6c2514b:2219
+httpMethod @ axios.js?v=e6c2514b:2356
+wrap @ axios.js?v=e6c2514b:8
+handleUpload @ temp-excel-uploader.tsx:65
+callCallback2 @ chunk-3VTW7PKX.js?v=e6c2514b:3680
+invokeGuardedCallbackDev @ chunk-3VTW7PKX.js?v=e6c2514b:3705
+invokeGuardedCallback @ chunk-3VTW7PKX.js?v=e6c2514b:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-3VTW7PKX.js?v=e6c2514b:3742
+executeDispatch @ chunk-3VTW7PKX.js?v=e6c2514b:7046
+processDispatchQueueItemsInOrder @ chunk-3VTW7PKX.js?v=e6c2514b:7066
+processDispatchQueue @ chunk-3VTW7PKX.js?v=e6c2514b:7075
+dispatchEventsForPlugins @ chunk-3VTW7PKX.js?v=e6c2514b:7083
+(anonymous) @ chunk-3VTW7PKX.js?v=e6c2514b:7206
+batchedUpdates$1 @ chunk-3VTW7PKX.js?v=e6c2514b:18966
+batchedUpdates @ chunk-3VTW7PKX.js?v=e6c2514b:3585
+dispatchEventForPluginEventSystem @ chunk-3VTW7PKX.js?v=e6c2514b:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-3VTW7PKX.js?v=e6c2514b:5484
+dispatchEvent @ chunk-3VTW7PKX.js?v=e6c2514b:5478
+dispatchDiscreteEvent @ chunk-3VTW7PKX.js?v=e6c2514b:5455Understand this error
+temp-excel-uploader.tsx:76 Upload failed details: 

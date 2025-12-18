@@ -29,7 +29,7 @@ export default function TraineeDetails() {
 			try {
 				console.log("🔵 Fetching client with ID:", id);
 				const clientData = await userService.getClientById(id);
-				setClient(clientData);
+				setClient(clientData.data);
 				setError(null);
 			} catch (err) {
 				console.error("❌ Failed to fetch client data:", err);

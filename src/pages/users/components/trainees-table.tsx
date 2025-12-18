@@ -1,16 +1,14 @@
-import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
+import { Icon } from "@/components/icon";
+import type { Client } from "@/types/entity";
+import { Avatar } from "@/ui/avatar";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
-import { Avatar } from "@/ui/avatar";
-import { Icon } from "@/components/icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Input } from "@/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
-import type { Client } from "@/types/entity";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
 import { format } from "date-fns";
-import { toast } from "sonner";
-import userService from "@/api/services/userService";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
 interface TraineesTableProps {
@@ -20,17 +18,11 @@ interface TraineesTableProps {
 	onStatusUpdate?: (clientId: string, status: "active" | "suspended") => void;
 }
 
-export default function TraineesTable({
-	trainees,
-	onAddTrainee,
-	showAddButton = false,
-	onStatusUpdate,
-}: TraineesTableProps) {
+export default function TraineesTable({ trainees, onAddTrainee, showAddButton = false }: TraineesTableProps) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [sortBy, setSortBy] = useState<keyof Client>("createdAt");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-	const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 	const navigate = useNavigate();
 
 	console.log("Trainees from trainees-table--->", trainees);
@@ -68,25 +60,6 @@ export default function TraineesTable({
 		} else {
 			setSortBy(column);
 			setSortOrder("asc");
-		}
-	};
-
-	const handleStatusToggle = async (clientId: string, currentStatus: string) => {
-		try {
-			setUpdatingStatus(clientId);
-			const newStatus = currentStatus === "IN_PROGRESS" ? "suspended" : "active";
-
-			await userService.updateUserStatus(clientId, { status: newStatus });
-
-			if (onStatusUpdate) {
-				onStatusUpdate(clientId, newStatus);
-			}
-
-			toast.success(`Client status updated to ${newStatus}`);
-		} catch (error: any) {
-			toast.error(error?.response?.data?.message || "Failed to update status");
-		} finally {
-			setUpdatingStatus(null);
 		}
 	};
 
@@ -197,7 +170,7 @@ export default function TraineesTable({
 											<TableCell>
 												<div className="flex items-center gap-3">
 													<Avatar className="h-10 w-10">
-														<div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+														<div className="w-full h-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
 															{(trainee.first_name?.charAt(0) || "U").toUpperCase()}
 															{(trainee.last_name?.charAt(0) || "").toUpperCase()}
 														</div>

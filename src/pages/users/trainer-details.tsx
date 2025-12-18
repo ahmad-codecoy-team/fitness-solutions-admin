@@ -83,8 +83,8 @@ export default function TrainerDetails() {
 				console.log("✅ Trainer data received:", trainerData);
 				console.log("✅ Clients data received:", clientsData);
 
-				setTrainer(trainerData as ApiTrainer);
-				setTrainerClients(clientsData as ApiClient[]);
+				setTrainer(trainerData.data as ApiTrainer);
+				setTrainerClients(clientsData.data as ApiClient[]);
 				setError(null);
 			} catch (err) {
 				console.error("❌ Failed to fetch trainer data:", err);
@@ -205,7 +205,13 @@ export default function TrainerDetails() {
 								</div>
 								<div>
 									<p className="text-sm text-muted-foreground">Joined</p>
-									<p className="text-lg font-semibold">{format(new Date(trainer.createdAt), "MMM dd, yyyy")}</p>
+									<p className="text-lg font-semibold">
+										{trainer?.createdAt
+											? new Date(trainer.createdAt).toString() !== "Invalid Date"
+												? format(new Date(trainer.createdAt), "MMM dd, yyyy")
+												: "Invalid date"
+											: "No date"}
+									</p>
 								</div>
 							</div>
 						</div>

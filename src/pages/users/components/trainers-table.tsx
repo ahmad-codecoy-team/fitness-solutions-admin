@@ -1,5 +1,4 @@
 import userService from "@/api/services/userService";
-import fallbackImg from "@/assets/images/avatars/avatar-1.png";
 import { Icon } from "@/components/icon";
 import type { Trainer } from "@/types/entity";
 import { Avatar } from "@/ui/avatar";
@@ -30,11 +29,27 @@ export default function TrainersTable() {
 		const fetchTrainers = async () => {
 			try {
 				setLoading(true);
-				const trainers = await userService.getAllTrainers();
-				setTrainers(trainers); // API client extracts data automatically
+				const data = await userService.getAllTrainers();
+				console.log("✅ Trainers fetched:", data);
+
+				// Handle different API response formats
+				if (data && data.data && Array.isArray(data.data) && data.meta) {
+					// Paginated response with { data: [...], meta: {...} }
+					console.log("📄 Paginated API response detected for trainers");
+					setTrainers(data.data);
+				} else if (Array.isArray(data)) {
+					// Direct array response (fallback for non-paginated APIs)
+					console.log("📄 Direct array response for trainers");
+					setTrainers(data);
+				} else {
+					// Unexpected response format
+					console.error("❌ Unexpected API response format:", data);
+					setTrainers([]);
+				}
 			} catch (error: any) {
 				toast.error("Failed to fetch trainers");
 				console.error("Error fetching trainers:", error);
+				setTrainers([]);
 			} finally {
 				setLoading(false);
 			}
@@ -43,8 +58,9 @@ export default function TrainersTable() {
 		fetchTrainers();
 	}, []);
 
-	// Filter and sort trainers
-	const filteredTrainers = trainers
+	// Filter and sort trainers - ensure trainers is defined and is an array
+	console.log("Trainers before filtering--->", trainers);
+	const filteredTrainers = (trainers || [])
 		.filter((trainer) => {
 			const fullName = `${trainer.first_name} ${trainer.last_name}`;
 			const matchesSearch =
@@ -82,19 +98,6 @@ export default function TrainersTable() {
 			setSortOrder("asc");
 		}
 	};
-
-	// const handleToggleStatus = (trainerId: string, currentStatus: string) => {
-	// 	const newStatus = currentStatus === "suspended" ? "active" : "suspended";
-
-	// 	setTrainers((prev) => prev.map((t) => (t.id === trainerId ? { ...t, status: newStatus } : t)));
-
-	// 	// console.log(`Trainer ${trainerId} status updated to ${newStatus}`);
-	// 	toast.success(`${trainerId} is now ${newStatus}`);
-	// };
-
-	// const handleViewDetails = (trainerId: string) => {
-	// 	navigate(`/users/trainer/${trainerId}`);
-	// };
 
 	const getStatusBadge = (status?: string) => {
 		// Handle missing status field for old users (show as 'active')
@@ -217,6 +220,19 @@ export default function TrainersTable() {
 											Loading trainers...
 										</TableCell>
 									</TableRow>
+								) : filteredTrainers.length === 0 ? (
+									<TableRow>
+										<TableCell colSpan={5}>
+											<div className="text-center py-8">
+												<Icon
+													icon="solar:users-group-two-rounded-bold-duotone"
+													className="h-12 w-12 text-muted-foreground mx-auto mb-4"
+												/>
+												<h3 className="text-lg font-medium">No trainers found</h3>
+												<p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+											</div>
+										</TableCell>
+									</TableRow>
 								) : (
 									filteredTrainers.map((trainer) => {
 										const fullName = `${trainer.first_name} ${trainer.last_name}`;
@@ -281,17 +297,6 @@ export default function TrainersTable() {
 							</TableBody>
 						</Table>
 					</div>
-
-					{filteredTrainers.length === 0 && (
-						<div className="text-center py-8">
-							<Icon
-								icon="solar:users-group-two-rounded-bold-duotone"
-								className="h-12 w-12 text-muted-foreground mx-auto mb-4"
-							/>
-							<h3 className="text-lg font-medium">No trainers found</h3>
-							<p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
-						</div>
-					)}
 				</CardContent>
 			</Card>
 		</div>

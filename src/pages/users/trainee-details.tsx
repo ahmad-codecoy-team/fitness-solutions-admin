@@ -1,21 +1,60 @@
+import userService from "@/api/services/userService";
 import { Icon } from "@/components/icon";
-import { mockTrainees } from "@/mocks/users";
+import type { Client } from "@/types/entity";
 import { Avatar } from "@/ui/avatar";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { getImageUrl } from "@/utils";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router";
 
 export default function TraineeDetails() {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
+	const [client, setClient] = useState<Client | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	// Find trainee by ID
-	const trainee = mockTrainees.find((t) => t.id === id);
+	useEffect(() => {
+		const fetchClientData = async () => {
+			if (!id) {
+				setError("No client ID provided");
+				setLoading(false);
+				return;
+			}
 
-	if (!trainee) {
+			try {
+				console.log("🔵 Fetching client with ID:", id);
+				const clientData = await userService.getClientById(id);
+				setClient(clientData);
+				setError(null);
+			} catch (err) {
+				console.error("❌ Failed to fetch client data:", err);
+				setError("Failed to load client data");
+				setClient(null);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchClientData();
+	}, [id]);
+
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+					<p>Loading client details...</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (error || !client) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="text-center">
@@ -23,9 +62,9 @@ export default function TraineeDetails() {
 						icon="solar:users-group-rounded-bold-duotone"
 						className="h-12 w-12 mx-auto mb-4 text-muted-foreground"
 					/>
-					<h3 className="text-lg font-medium">Trainee not found</h3>
-					<p className="text-muted-foreground mb-4">The trainee you're looking for doesn't exist.</p>
-					<Button onClick={() => navigate("/users")}>
+					<h3 className="text-lg font-medium">Client not found</h3>
+					<p className="text-muted-foreground mb-4">{error || "The client you're looking for doesn't exist."}</p>
+					<Button onClick={() => navigate(-1)}>
 						<Icon icon="solar:arrow-left-bold-duotone" className="h-4 w-4 mr-2" />
 						Back to Users
 					</Button>
@@ -61,7 +100,7 @@ export default function TraineeDetails() {
 	return (
 		<div className="flex flex-col gap-6 p-6">
 			<Helmet>
-				<title>{trainee.name} - Trainee Details</title>
+				<title>{`${client.first_name}` || "Client"} - Client Details</title>
 			</Helmet>
 
 			{/* Header */}
@@ -71,8 +110,8 @@ export default function TraineeDetails() {
 						<Icon icon="solar:arrow-left-bold-duotone" className="h-4 w-4" />
 					</Button>
 					<div>
-						<h1 className="text-3xl font-bold text-foreground">Trainee Details</h1>
-						<p className="text-muted-foreground">View and manage trainee information</p>
+						<h1 className="text-3xl font-bold text-foreground">Client Details</h1>
+						<p className="text-muted-foreground">View and manage client information</p>
 					</div>
 				</div>
 			</div>
@@ -90,37 +129,37 @@ export default function TraineeDetails() {
 					<CardContent className="space-y-6">
 						<div className="flex items-start gap-4">
 							<Avatar className="h-20 w-20">
-								<img
-									src={trainee.avatar || "/src/assets/images/avatars/avatar-4.png"}
-									alt={trainee.name}
-									className="object-cover"
-								/>
+								<img src={getImageUrl(client.avatar)} alt={client.name || "Client"} className="object-cover" />
 							</Avatar>
 							<div className="flex-1">
 								<div className="flex items-center gap-3 mb-2">
-									<h2 className="text-2xl font-bold">{trainee.name}</h2>
-									{getStatusBadge(trainee.status)}
+									<h2 className="text-2xl font-bold">
+										{`${client.first_name} ${client.last_name}` || "Unknown Client"}
+									</h2>
+									{getStatusBadge(client.status || "inactive")}
 								</div>
 								<div className="grid gap-3 md:grid-cols-2">
 									<div className="flex items-center gap-2 text-muted-foreground">
 										<Icon icon="solar:letter-bold-duotone" className="h-4 w-4" />
-										<span>{trainee.email}</span>
+										<span>{client.email || "No email"}</span>
 									</div>
-									{trainee.phone && (
+									{client.phone && (
 										<div className="flex items-center gap-2 text-muted-foreground">
 											<Icon icon="solar:phone-bold-duotone" className="h-4 w-4" />
-											<span>{trainee.phone}</span>
+											<span>{client.phone}</span>
 										</div>
 									)}
-									{trainee.gender && (
+									{client.gender && (
 										<div className="flex items-center gap-2 text-muted-foreground">
-											<Icon icon={getGenderIcon(trainee.gender)} className="h-4 w-4" />
-											<span className="capitalize">{trainee.gender}</span>
+											<Icon icon={getGenderIcon(client.gender)} className="h-4 w-4" />
+											<span className="capitalize">{client.gender}</span>
 										</div>
 									)}
 									<div className="flex items-center gap-2 text-muted-foreground">
 										<Icon icon="solar:calendar-bold-duotone" className="h-4 w-4" />
-										<span>Joined {format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>
+										<span>
+											Joined {client.createdAt ? format(new Date(client.createdAt), "MMM dd, yyyy") : "Unknown"}
+										</span>
 									</div>
 								</div>
 							</div>
@@ -129,32 +168,43 @@ export default function TraineeDetails() {
 				</Card>
 
 				{/* Trainer Information */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<Icon icon="solar:user-check-bold-duotone" />
-							Assigned Trainer
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center gap-3">
-							<Icon icon="solar:user-bold-duotone" className="h-10 w-10 text-primary" />
-							<div>
-								<h3 className="font-semibold">{trainee.trainerName}</h3>
-								<p className="text-sm text-muted-foreground">Personal Trainer</p>
+				{client.trainer && typeof client.trainer === "object" && (
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Icon icon="solar:user-check-bold-duotone" />
+								Assigned Trainer
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="flex items-center gap-3">
+								<Avatar className="h-12 w-12">
+									<img
+										src={getImageUrl(client.trainer.avatar)}
+										alt={`${client.trainer.first_name} ${client.trainer.last_name}`}
+										className="object-cover"
+									/>
+								</Avatar>
+								<div className="flex-1">
+									<h3 className="font-semibold">
+										{client.trainer.first_name} {client.trainer.last_name}
+									</h3>
+									<p className="text-sm text-muted-foreground">{client.trainer.role?.name || "Personal Trainer"}</p>
+									<p className="text-xs text-muted-foreground">{client.trainer.email}</p>
+								</div>
+								<div className="ml-auto">
+									<Button variant="outline" size="sm" onClick={() => navigate(`/users/trainer/${client.trainer._id}`)}>
+										<Icon icon="solar:eye-bold-duotone" className="h-4 w-4 mr-2" />
+										View Trainer
+									</Button>
+								</div>
 							</div>
-							<div className="ml-auto">
-								<Button variant="outline" size="sm" onClick={() => navigate(`/users/trainer/${trainee.trainerId}`)}>
-									<Icon icon="solar:eye-bold-duotone" className="h-4 w-4 mr-2" />
-									View Trainer
-								</Button>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
+				)}
 
 				{/* Current Program */}
-				{trainee.currentProgram && (
+				{client.currentProgram && (
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
@@ -166,7 +216,7 @@ export default function TraineeDetails() {
 							<div className="flex items-center gap-3">
 								<Icon icon="solar:dumbbell-small-bold-duotone" className="h-10 w-10 text-primary" />
 								<div>
-									<h3 className="font-semibold">{trainee.currentProgram}</h3>
+									<h3 className="font-semibold">{client.currentProgram}</h3>
 									<p className="text-sm text-muted-foreground">Active fitness program</p>
 								</div>
 							</div>

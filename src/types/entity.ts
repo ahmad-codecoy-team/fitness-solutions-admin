@@ -115,3 +115,132 @@ export type MenuMetaInfo = Partial<
 export type MenuTree = Menu & {
 	children?: MenuTree[];
 };
+
+// Exercise types based on API documentation
+export interface Exercise {
+	_id: string;
+	trainer: string | null;
+	title: string;
+	description: string;
+	video_link: string;
+	pattern: string[];
+	type: string[];
+	primary_muscle: string[];
+	plane: string[];
+	photo: string;
+	exercise_type: string;
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
+}
+
+export interface ExerciseCreateRequest {
+	title: string;
+	description: string;
+	video_link: string;
+	type: string | string[];
+}
+
+export interface ExerciseUpdateRequest {
+	title?: string;
+	description?: string;
+	video_link?: string;
+	type?: string | string[];
+}
+
+export interface ExerciseResponse {
+	success: boolean;
+	code: number;
+	data: Exercise;
+}
+
+export interface ExercisesListResponse {
+	success: boolean;
+	code: number;
+	data: Exercise[];
+	meta: {
+		total: number;
+	};
+}
+
+// User types based on API documentation
+export interface Trainer {
+	_id: string;
+	first_name: string;
+	last_name: string;
+	avatar: string;
+	email: string;
+	role: {
+		_id: string;
+		name: string;
+		createdAt: string;
+		updatedAt: string;
+		__v?: number;
+	};
+	status: "active" | "suspended";
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
+}
+
+export interface Client {
+	_id: string;
+	first_name: string;
+	last_name: string;
+	dob: string | null;
+	email: string;
+	trainer: string | Trainer;
+	phone: string;
+	gender: "male" | "female" | "other";
+	start_weight: number;
+	current_weight: number;
+	target_weight: number;
+	signature: string;
+	status: "IN_PROGRESS" | string;
+	attachments: Array<{ title: string; file: string }>;
+	questions: Array<{
+		question: string;
+		answer: boolean;
+		description: string;
+	}>;
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
+}
+
+export interface TrainersListResponse {
+	success: boolean;
+	code: number;
+	data: Trainer[];
+	meta: {
+		total: number;
+	};
+}
+
+export interface TrainerResponse {
+	success: boolean;
+	code: number;
+	data: Trainer;
+}
+
+export interface ClientsListResponse {
+	success: boolean;
+	code: number;
+	data: Client[];
+}
+
+export interface ClientResponse {
+	success: boolean;
+	code: number;
+	data: Client;
+}
+
+export interface UserStatusUpdateRequest {
+	status: "active" | "suspended";
+}
+
+export interface UserStatusUpdateResponse {
+	success: boolean;
+	code: number;
+	data: Trainer | Client;
+}

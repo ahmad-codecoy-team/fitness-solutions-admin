@@ -1,5 +1,7 @@
+import userService from "@/api/services/userService";
+import fallbackImg from "@/assets/images/avatars/avatar-1.png";
 import { Icon } from "@/components/icon";
-import { type Trainer, mockTrainers } from "@/mocks/users";
+import type { Trainer } from "@/types/entity";
 import { Avatar } from "@/ui/avatar";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
@@ -7,27 +9,52 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Input } from "@/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
+import { getImageUrl } from "@/utils";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 export default function TrainersTable() {
 	const navigate = useNavigate();
-	const [trainers, setTrainers] = useState<Trainer[]>(mockTrainers);
+	const [trainers, setTrainers] = useState<Trainer[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	const [searchTerm, setSearchTerm] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [sortBy, setSortBy] = useState<keyof Trainer>("createdAt");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+	// Fetch trainers from API
+	useEffect(() => {
+		const fetchTrainers = async () => {
+			try {
+				setLoading(true);
+				const trainers = await userService.getAllTrainers();
+				setTrainers(trainers); // API client extracts data automatically
+			} catch (error: any) {
+				toast.error("Failed to fetch trainers");
+				console.error("Error fetching trainers:", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchTrainers();
+	}, []);
+
 	// Filter and sort trainers
 	const filteredTrainers = trainers
 		.filter((trainer) => {
+			const fullName = `${trainer.first_name} ${trainer.last_name}`;
 			const matchesSearch =
-				trainer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				trainer.email.toLowerCase().includes(searchTerm.toLowerCase());
-			const matchesStatus = statusFilter === "all" || trainer.status === statusFilter;
+				fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				trainer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				trainer.role.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+			// Handle missing status field for old users (show as 'active')
+			const trainerStatus = trainer.status || "active";
+			const matchesStatus = statusFilter === "all" || trainerStatus === statusFilter;
 			return matchesSearch && matchesStatus;
 		})
 		.sort((a, b) => {
@@ -56,29 +83,52 @@ export default function TrainersTable() {
 		}
 	};
 
-	const handleToggleStatus = (trainerId: string, currentStatus: string) => {
-		const newStatus = currentStatus === "suspended" ? "active" : "suspended";
+	// const handleToggleStatus = (trainerId: string, currentStatus: string) => {
+	// 	const newStatus = currentStatus === "suspended" ? "active" : "suspended";
 
-		setTrainers((prev) => prev.map((t) => (t.id === trainerId ? { ...t, status: newStatus } : t)));
+	// 	setTrainers((prev) => prev.map((t) => (t.id === trainerId ? { ...t, status: newStatus } : t)));
 
-		// console.log(`Trainer ${trainerId} status updated to ${newStatus}`);
-		toast.success(`${trainerId} is now ${newStatus}`);
+	// 	// console.log(`Trainer ${trainerId} status updated to ${newStatus}`);
+	// 	toast.success(`${trainerId} is now ${newStatus}`);
+	// };
+
+	// const handleViewDetails = (trainerId: string) => {
+	// 	navigate(`/users/trainer/${trainerId}`);
+	// };
+
+	const getStatusBadge = (status?: string) => {
+		// Handle missing status field for old users (show as 'active')
+		const trainerStatus = status || "active";
+
+		switch (trainerStatus) {
+			case "active":
+				return <Badge variant="default">Active</Badge>;
+			case "suspended":
+				return <Badge variant="destructive">Suspended</Badge>;
+			default:
+				return <Badge variant="default">Active</Badge>;
+		}
 	};
 
 	const handleViewDetails = (trainerId: string) => {
 		navigate(`/users/trainer/${trainerId}`);
 	};
 
-	const getStatusBadge = (status: string) => {
-		switch (status) {
-			case "active":
-				return <Badge variant="default">Active</Badge>;
-			case "suspended":
-				return <Badge variant="destructive">Suspended</Badge>;
-			case "inactive":
-				return <Badge variant="secondary">Inactive</Badge>;
-			default:
-				return <Badge variant="secondary">{status}</Badge>;
+	const handleToggleStatus = async (trainerId: string, currentStatus: string) => {
+		try {
+			const newStatus = currentStatus === "suspended" ? "active" : "suspended";
+			await userService.updateUserStatus(trainerId, { status: newStatus });
+
+			// Update local state
+			setTrainers((prev) =>
+				prev.map((trainer) =>
+					trainer._id === trainerId ? { ...trainer, status: newStatus as "active" | "suspended" } : trainer,
+				),
+			);
+
+			toast.success(`Trainer status updated to ${newStatus}`);
+		} catch (error: any) {
+			toast.error(error?.response?.data?.message || "Failed to update status");
 		}
 	};
 
@@ -123,7 +173,6 @@ export default function TrainersTable() {
 								<SelectItem value="all">All Status</SelectItem>
 								<SelectItem value="active">Active</SelectItem>
 								<SelectItem value="suspended">Suspended</SelectItem>
-								<SelectItem value="inactive">Inactive</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -150,12 +199,7 @@ export default function TrainersTable() {
 											<Icon icon={getSortIcon("status")} className="h-4 w-4" />
 										</div>
 									</TableHead>
-									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("traineesCount")}>
-										<div className="flex items-center gap-1">
-											Trainees
-											<Icon icon={getSortIcon("traineesCount")} className="h-4 w-4" />
-										</div>
-									</TableHead>
+									<TableHead>Role</TableHead>
 									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("createdAt")}>
 										<div className="flex items-center gap-1">
 											Joined
@@ -166,63 +210,74 @@ export default function TrainersTable() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{filteredTrainers.map((trainer) => (
-									<TableRow key={trainer.id} className="hover:bg-muted/50">
-										<TableCell>
-											<div className="flex items-center gap-3">
-												<Avatar className="h-10 w-10">
-													<img
-														src={trainer.avatar || "/src/assets/images/avatars/avatar-1.png"}
-														alt={trainer.name}
-														className="object-cover"
-													/>
-												</Avatar>
-												<div>
-													<div className="font-medium">{trainer.name}</div>
-													<div className="text-sm text-muted-foreground">{trainer.email}</div>
-												</div>
-											</div>
-										</TableCell>
-										<TableCell>{getStatusBadge(trainer.status)}</TableCell>
-										<TableCell>
-											<div className="flex items-center gap-2">
-												<Icon
-													icon="solar:users-group-two-rounded-bold-duotone"
-													className="h-4 w-4 text-muted-foreground"
-												/>
-												<span>{trainer.traineesCount}</span>
-											</div>
-										</TableCell>
-										<TableCell>
-											<span className="text-sm">{format(new Date(trainer.createdAt), "MMM dd, yyyy")}</span>
-										</TableCell>
-										<TableCell className="text-right">
-											<div className="flex justify-end gap-2">
-												<Button variant="outline" size="sm" onClick={() => handleViewDetails(trainer.id)}>
-													<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
-												</Button>
-												{trainer.status === "suspended" ? (
-													<Button
-														variant="default"
-														size="sm"
-														onClick={() => handleToggleStatus(trainer.id, trainer.status)}
-														className="bg-green-600 hover:bg-green-700 text-white"
-													>
-														<Icon icon="solar:play-bold-duotone" className="h-4 w-4" />
-													</Button>
-												) : (
-													<Button
-														variant="destructive"
-														size="sm"
-														onClick={() => handleToggleStatus(trainer.id, trainer.status)}
-													>
-														<Icon icon="solar:pause-bold-duotone" className="h-4 w-4" />
-													</Button>
-												)}
-											</div>
+								{loading ? (
+									<TableRow>
+										<TableCell colSpan={5} className="text-center py-8">
+											<Icon icon="solar:refresh-bold-duotone" className="h-6 w-6 animate-spin mx-auto mb-2" />
+											Loading trainers...
 										</TableCell>
 									</TableRow>
-								))}
+								) : (
+									filteredTrainers.map((trainer) => {
+										const fullName = `${trainer.first_name} ${trainer.last_name}`;
+										return (
+											<TableRow key={trainer._id} className="hover:bg-muted/50">
+												<TableCell>
+													<div className="flex items-center gap-3">
+														<Avatar className="h-10 w-10">
+															{trainer.avatar ? (
+																<img
+																	src={getImageUrl(trainer.avatar)}
+																	alt={trainer.first_name}
+																	className="object-cover"
+																/>
+															) : (
+																<div className="w-full h-full bg-linear-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-medium">
+																	{trainer.first_name.charAt(0)}
+																	{trainer.last_name.charAt(0)}
+																</div>
+															)}
+														</Avatar>
+														<div>
+															<div className="font-medium">{fullName}</div>
+															<div className="text-sm text-muted-foreground">{trainer.email}</div>
+														</div>
+													</div>
+												</TableCell>
+												<TableCell>{getStatusBadge(trainer.status)}</TableCell>
+												<TableCell>
+													<Badge variant="outline" className="text-xs">
+														{trainer.role.name}
+													</Badge>
+												</TableCell>
+												<TableCell>
+													<span className="text-sm">{format(new Date(trainer.createdAt), "MMM dd, yyyy")}</span>
+												</TableCell>
+												<TableCell className="text-right">
+													<div className="flex justify-end gap-2">
+														<Button variant="outline" size="sm" onClick={() => handleViewDetails(trainer._id)}>
+															<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
+														</Button>
+														<Button
+															variant={trainer.status === "suspended" ? "default" : "destructive"}
+															size="sm"
+															onClick={() => handleToggleStatus(trainer._id, trainer.status)}
+															className={
+																trainer.status === "suspended" ? "bg-green-600 hover:bg-green-700 text-white" : ""
+															}
+														>
+															{trainer.status === "suspended" ? (
+																<Icon icon="solar:play-bold-duotone" className="h-4 w-4" />
+															) : (
+																<Icon icon="solar:pause-bold-duotone" className="h-4 w-4" />
+															)}
+														</Button>
+													</div>
+												</TableCell>
+											</TableRow>
+										);
+									})
+								)}
 							</TableBody>
 						</Table>
 					</div>

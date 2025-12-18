@@ -7,7 +7,8 @@ import { Textarea } from "@/ui/textarea";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { type Exercise } from "@/mocks/exercises";
+import { type Exercise, type ExerciseCreateRequest, type ExerciseUpdateRequest } from "@/types/entity";
+import exerciseService from "@/api/services/exercises";
 
 interface ExerciseFormProps {
     initialData?: Exercise;
@@ -18,15 +19,14 @@ export default function ExerciseForm({ initialData, isEdit = false }: ExerciseFo
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
-    const [formData, setFormData] = useState<Partial<Exercise>>(initialData || {
-        name: "",
-        category: "",
-        difficulty: "Beginner",
-        description: "",
-        videoUrl: "",
+    const [formData, setFormData] = useState({
+        title: initialData?.title || "",
+        description: initialData?.description || "",
+        video_link: initialData?.video_link || "",
+        type: initialData?.type?.join(", ") || "",
     });
 
-    const handleChange = (field: keyof Exercise, value: string) => {
+    const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -34,12 +34,31 @@ export default function ExerciseForm({ initialData, isEdit = false }: ExerciseFo
         e.preventDefault();
         setLoading(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+            // Convert type string to array
+            const typeArray = formData.type.split(",").map(t => t.trim()).filter(t => t.length > 0);
+            
+            const requestData: ExerciseCreateRequest | ExerciseUpdateRequest = {
+                title: formData.title,
+                description: formData.description,
+                video_link: formData.video_link,
+                type: typeArray,
+            };
 
-        toast.success(isEdit ? "Exercise updated successfully" : "Exercise created successfully");
-        setLoading(false);
-        navigate("/exercises");
+            if (isEdit && initialData?._id) {
+                await exerciseService.updateExercise(initialData._id, requestData);
+                toast.success("Exercise updated successfully");
+            } else {
+                await exerciseService.createExercise(requestData as ExerciseCreateRequest);
+                toast.success("Exercise created successfully");
+            }
+
+            navigate("/exercises");
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "An error occurred");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -48,53 +67,13 @@ export default function ExerciseForm({ initialData, isEdit = false }: ExerciseFo
                 <CardContent className="pt-6">
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Exercise Name</Label>
+                            <Label htmlFor="title">Exercise Title</Label>
                             <Input 
-                                id="name" 
-                                placeholder="e.g. Push Up" 
-                                value={formData.name} 
-                                onChange={(e) => handleChange("name", e.target.value)} 
+                                id="title" 
+                                placeholder="e.g. Push Ups" 
+                                value={formData.title} 
+                                onChange={(e) => handleChange("title", e.target.value)} 
                                 required
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="category">Category</Label>
-                                <Input 
-                                    id="category" 
-                                    placeholder="e.g. Chest" 
-                                    value={formData.category} 
-                                    onChange={(e) => handleChange("category", e.target.value)} 
-                                    required
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="difficulty">Difficulty</Label>
-                                <Select 
-                                    value={formData.difficulty} 
-                                    onValueChange={(value) => handleChange("difficulty", value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select difficulty" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Beginner">Beginner</SelectItem>
-                                        <SelectItem value="Intermediate">Intermediate</SelectItem>
-                                        <SelectItem value="Advanced">Advanced</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-
-                         <div className="grid gap-2">
-                            <Label htmlFor="videoUrl">Video URL</Label>
-                            <Input 
-                                id="videoUrl" 
-                                placeholder="https://..." 
-                                value={formData.videoUrl} 
-                                onChange={(e) => handleChange("videoUrl", e.target.value)} 
                             />
                         </div>
 
@@ -108,6 +87,29 @@ export default function ExerciseForm({ initialData, isEdit = false }: ExerciseFo
                                 className="min-h-[150px]"
                                 required
                             />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="video_link">Video Link</Label>
+                            <Input 
+                                id="video_link" 
+                                placeholder="https://youtube.com/..." 
+                                value={formData.video_link} 
+                                onChange={(e) => handleChange("video_link", e.target.value)} 
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="type">Exercise Types</Label>
+                            <Input 
+                                id="type" 
+                                placeholder="e.g. strength, cardio, flexibility (comma-separated)" 
+                                value={formData.type} 
+                                onChange={(e) => handleChange("type", e.target.value)} 
+                            />
+                            <p className="text-sm text-muted-foreground">
+                                Enter exercise types separated by commas (e.g., strength, cardio, flexibility)
+                            </p>
                         </div>
 
                         <div className="flex justify-end gap-3">

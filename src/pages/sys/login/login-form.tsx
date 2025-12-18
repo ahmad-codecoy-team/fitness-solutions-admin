@@ -25,8 +25,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
 	const form = useForm<SignInReq>({
 		defaultValues: {
-			email: "",
-			password: "",
+			email: "admin@gmail.com",
+			password: "123456",
 		},
 	});
 
@@ -105,19 +105,6 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 						{t("sys.login.loginButton")}
 					</Button>
 
-					{/* 注册链接 */}
-					<div className="text-center">
-						<p className="text-sm text-muted-foreground">
-							Don't have an account?{" "}
-							<Button
-								variant="link"
-								className="p-0 h-auto font-semibold text-primary"
-								onClick={() => navigate("/signup")}
-							>
-								Sign Up
-							</Button>
-						</p>
-					</div>
 				</form>
 			</Form>
 		</div>

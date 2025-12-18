@@ -26,6 +26,7 @@ export const frontendDashboardRoutes: RouteObject[] = [
 		children: [
 			{ index: true, element: Component("/pages/exercises") },
 			{ path: "new", element: Component("/pages/exercises/create") },
+			{ path: ":id", element: Component("/pages/exercises/details") },
 			{ path: ":id/edit", element: Component("/pages/exercises/edit") },
 		],
 	},

@@ -22,6 +22,7 @@ export const getImageUrl = (filename?: string): string | undefined => {
 	// Ensure proper URL formatting (remove trailing slash if exists, add single slash)
 	const baseUrl = imageBaseUrl.replace(/\/$/, "");
 	const fileName = filename.startsWith("/") ? filename.substring(1) : filename;
+	console.log(`final image url returned: ${baseUrl}/${fileName}`);
 
 	return `${baseUrl}/${fileName}`;
 };

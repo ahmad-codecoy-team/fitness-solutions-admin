@@ -24,7 +24,6 @@ export const API_CONFIG = {
 export const ENDPOINTS = {
 	AUTH: {
 		LOGIN: "/auth/login",
-		SIGNUP: "/auth/signup",
 		FORGOT_PASSWORD: "/auth/forgot-password",
 		RESET_PASSWORD: "/auth/reset-password",
 		CHANGE_PASSWORD: "/auth/change-password",

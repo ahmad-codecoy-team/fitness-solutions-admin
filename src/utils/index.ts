@@ -40,3 +40,27 @@ export const urlJoin = (...parts: string[]) => {
 		.filter(Boolean);
 	return `/${result.join("/")}`;
 };
+
+// Image URL utilities
+import { GLOBAL_CONFIG } from "@/global-config";
+
+/**
+ * Get full image URL by appending the base image URL
+ * @param imagePath - Relative path or filename of the image
+ * @returns Full URL to the image, or fallback avatar if no path provided
+ */
+export function getImageUrl(imagePath?: string | null): string {
+	if (!imagePath) {
+		return "/src/assets/images/avatars/avatar-4.png"; // Default fallback avatar
+	}
+	
+	// If already a full URL, return as is
+	if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+		return imagePath;
+	}
+	
+	// Append base URL to relative path
+	const baseUrl = GLOBAL_CONFIG.imageBaseUrl;
+	const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+	return `${baseUrl}${cleanPath}`;
+}

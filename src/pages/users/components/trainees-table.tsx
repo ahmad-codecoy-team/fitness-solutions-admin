@@ -7,28 +7,42 @@ import { Icon } from "@/components/icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Input } from "@/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
-import type { Trainee } from "@/mocks/users";
+import type { Client } from "@/types/entity";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import userService from "@/api/services/userService";
+import { useNavigate } from "react-router";
 
 interface TraineesTableProps {
-	trainees: Trainee[];
+	trainees: Client[];
 	onAddTrainee?: () => void;
 	showAddButton?: boolean;
+	onStatusUpdate?: (clientId: string, status: "active" | "suspended") => void;
 }
 
-export default function TraineesTable({ trainees, onAddTrainee, showAddButton = false }: TraineesTableProps) {
+export default function TraineesTable({
+	trainees,
+	onAddTrainee,
+	showAddButton = false,
+	onStatusUpdate,
+}: TraineesTableProps) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
-	const [sortBy, setSortBy] = useState<keyof Trainee>("createdAt");
+	const [sortBy, setSortBy] = useState<keyof Client>("createdAt");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+	const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+	const navigate = useNavigate();
+
+	console.log("Trainees from trainees-table--->", trainees);
 
 	// Filter and sort trainees
 	const filteredTrainees = trainees
 		.filter((trainee) => {
+			const fullName = `${trainee.first_name} ${trainee.last_name}`;
 			const matchesSearch =
-				trainee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				trainee.email.toLowerCase().includes(searchTerm.toLowerCase());
-			const matchesStatus = statusFilter === "all" || trainee.status === statusFilter;
+			const matchesStatus = statusFilter === "all" || trainee.status.toLowerCase() === statusFilter;
 			return matchesSearch && matchesStatus;
 		})
 		.sort((a, b) => {
@@ -36,7 +50,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 			let bValue = b[sortBy];
 
 			// Handle date properties
-			if (sortBy === "createdAt") {
+			if (sortBy === "createdAt" || sortBy === "updatedAt") {
 				aValue = new Date(a[sortBy]).getTime();
 				bValue = new Date(b[sortBy]).getTime();
 			}
@@ -48,7 +62,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 			}
 		});
 
-	const handleSort = (column: keyof Trainee) => {
+	const handleSort = (column: keyof Client) => {
 		if (sortBy === column) {
 			setSortOrder(sortOrder === "asc" ? "desc" : "asc");
 		} else {
@@ -57,12 +71,31 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 		}
 	};
 
+	const handleStatusToggle = async (clientId: string, currentStatus: string) => {
+		try {
+			setUpdatingStatus(clientId);
+			const newStatus = currentStatus === "IN_PROGRESS" ? "suspended" : "active";
+
+			await userService.updateUserStatus(clientId, { status: newStatus });
+
+			if (onStatusUpdate) {
+				onStatusUpdate(clientId, newStatus);
+			}
+
+			toast.success(`Client status updated to ${newStatus}`);
+		} catch (error: any) {
+			toast.error(error?.response?.data?.message || "Failed to update status");
+		} finally {
+			setUpdatingStatus(null);
+		}
+	};
+
 	const getStatusBadge = (status: string) => {
-		switch (status) {
+		switch (status.toLowerCase()) {
 			case "active":
 				return <Badge variant="default">Active</Badge>;
-			case "inactive":
-				return <Badge variant="secondary">Inactive</Badge>;
+			case "suspended":
+				return <Badge variant="destructive">Suspended</Badge>;
 			case "in_progress":
 				return <Badge variant="outline">In Progress</Badge>;
 			default:
@@ -70,7 +103,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 		}
 	};
 
-	const getSortIcon = (column: keyof Trainee) => {
+	const getSortIcon = (column: keyof Client) => {
 		if (sortBy !== column) {
 			return "solar:sort-vertical-bold-duotone";
 		}
@@ -110,8 +143,9 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="all">All Status</SelectItem>
+								<SelectItem value="in_progress">In Progress</SelectItem>
 								<SelectItem value="active">Active</SelectItem>
-								<SelectItem value="inactive">Inactive</SelectItem>
+								<SelectItem value="suspended">Suspended</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -123,7 +157,7 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Icon icon="solar:users-group-rounded-bold-duotone" />
-						Trainees ({filteredTrainees.length})
+						Clients ({filteredTrainees.length})
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -131,14 +165,15 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Trainee</TableHead>
+									<TableHead>Client Info</TableHead>
 									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("status")}>
 										<div className="flex items-center gap-1">
 											Status
 											<Icon icon={getSortIcon("status")} className="h-4 w-4" />
 										</div>
 									</TableHead>
-									<TableHead>Current Program</TableHead>
+									<TableHead>Weight Progress</TableHead>
+									<TableHead>Contact</TableHead>
 									<TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort("createdAt")}>
 										<div className="flex items-center gap-1">
 											Joined
@@ -149,48 +184,67 @@ export default function TraineesTable({ trainees, onAddTrainee, showAddButton = 
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{filteredTrainees.map((trainee) => (
-									<TableRow key={trainee.id} className="hover:bg-muted/50">
-										<TableCell>
-											<div className="flex items-center gap-3">
-												<Avatar className="h-10 w-10">
-													<img
-														src={trainee.avatar || "/src/assets/images/avatars/avatar-1.png"}
-														alt={trainee.name}
-														className="object-cover"
-													/>
-												</Avatar>
-												<div>
-													<div className="font-medium">{trainee.name}</div>
-													<div className="text-sm text-muted-foreground">{trainee.email}</div>
-													{trainee.phone && <div className="text-xs text-muted-foreground">{trainee.phone}</div>}
+								{filteredTrainees.map((trainee) => {
+									console.log("🔵 TraineesTable - Processing trainee:", {
+										id: trainee._id,
+										name: `${trainee.first_name} ${trainee.last_name}`,
+										email: trainee.email,
+										status: trainee.status,
+									});
+									const fullName = `${trainee.first_name} ${trainee.last_name}`;
+									return (
+										<TableRow key={trainee._id} className="hover:bg-muted/50">
+											<TableCell>
+												<div className="flex items-center gap-3">
+													<Avatar className="h-10 w-10">
+														<div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+															{(trainee.first_name?.charAt(0) || "U").toUpperCase()}
+															{(trainee.last_name?.charAt(0) || "").toUpperCase()}
+														</div>
+													</Avatar>
+													<div>
+														<div className="font-medium">{fullName}</div>
+														<div className="text-sm text-muted-foreground">{trainee.email}</div>
+														{trainee.gender && (
+															<div className="text-xs text-muted-foreground capitalize">{trainee.gender}</div>
+														)}
+													</div>
 												</div>
-											</div>
-										</TableCell>
-										<TableCell>{getStatusBadge(trainee.status)}</TableCell>
-										<TableCell>
-											{trainee.currentProgram ? (
-												<Badge variant="outline" className="text-xs">
-													{trainee.currentProgram}
-												</Badge>
-											) : (
-												<span className="text-muted-foreground text-sm">No program</span>
-											)}
-										</TableCell>
-										<TableCell>
-											<span className="text-sm">{format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>
-										</TableCell>
-										<TableCell className="text-right">
-											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => window.open(`/users/trainee/${trainee.id}`, "_self")}
-											>
-												<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
-											</Button>
-										</TableCell>
-									</TableRow>
-								))}
+											</TableCell>
+											<TableCell>{getStatusBadge(trainee.status)}</TableCell>
+											<TableCell>
+												<div className="text-sm">
+													<div>Start: {trainee.start_weight ? `${trainee.start_weight}kg` : "N/A"}</div>
+													<div>Current: {trainee.current_weight ? `${trainee.current_weight}kg` : "N/A"}</div>
+													<div>Target: {trainee.target_weight ? `${trainee.target_weight}kg` : "N/A"}</div>
+												</div>
+											</TableCell>
+											<TableCell>
+												<div className="text-sm">
+													{trainee.phone && <div>{trainee.phone}</div>}
+													{/* {trainee.dob && (
+														<div className="text-xs text-muted-foreground">
+															Born: {format(new Date(trainee.dob), "MMM dd, yyyy")}
+														</div>
+													)} */}
+												</div>
+											</TableCell>
+											<TableCell>
+												<span className="text-sm">{format(new Date(trainee.createdAt), "MMM dd, yyyy")}</span>
+											</TableCell>
+											<TableCell className="text-right">
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() => navigate(`/users/trainee/${trainee._id}`)}
+													title="View client details"
+												>
+													<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
+												</Button>
+											</TableCell>
+										</TableRow>
+									);
+								})}
 							</TableBody>
 						</Table>
 					</div>

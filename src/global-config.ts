@@ -14,6 +14,8 @@ export type GlobalConfig = {
 	publicPath: string;
 	/** Base URL for API endpoints */
 	apiBaseUrl: string;
+	/** Base URL for image assets */
+	imageBaseUrl: string;
 };
 
 /**
@@ -33,4 +35,6 @@ export const GLOBAL_CONFIG: GlobalConfig = {
 		import.meta.env.VITE_API_URL ||
 		import.meta.env.VITE_APP_API_BASE_URL ||
 		"/api/v1",
+	// Image base URL for user avatars and exercise photos
+	imageBaseUrl: import.meta.env.VITE_IMAGE_URL || "http://194.195.92.92/fitness-backend/uploads",
 };

@@ -62,6 +62,7 @@ export const useSignIn = () => {
 
 	const signIn = async (data: SignInReq) => {
 		try {
+			console.log("Signing in with payload--->", data);
 			const res = await signInMutation.mutateAsync(data);
 			const { user, accessToken } = res;
 			setUserToken({ accessToken, refreshToken: undefined });

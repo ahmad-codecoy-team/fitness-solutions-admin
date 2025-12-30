@@ -5,6 +5,7 @@ import AccountDropdown from "../components/account-dropdown";
 import BreadCrumb from "../components/bread-crumb";
 import SearchBar from "../components/search-bar";
 import SettingButton from "../components/setting-button";
+import LocalePicker from "@/components/locale-picker";
 
 interface HeaderProps {
 	leftSlot?: ReactNode;

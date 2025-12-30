@@ -33,7 +33,7 @@ export function DashboardHeader({ userLabel = "Admin", orgName = "Fitness Soluti
 			<div className="absolute inset-0 bg-linear-to-r from-primary/15 via-primary/10 to-transparent" />
 
 			{/* Content layer */}
-			<div className="relative z-10 p-6 md:p-8">
+			<div className="relative z-2 p-6 md:p-8">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 					{/* Left */}
 					<div className="flex-1 min-w-0">

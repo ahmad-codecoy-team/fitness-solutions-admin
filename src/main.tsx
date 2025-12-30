@@ -1,5 +1,6 @@
 import "./global.css";
 import "./theme/theme.css";
+import "./styles/scrollbar.css";
 import "./locales/i18n";
 import ReactDOM from "react-dom/client";
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router";

@@ -44,7 +44,7 @@ export default function ExerciseDetails() {
 			try {
 				console.log("🔵 Fetching exercise with ID:", id);
 				const exerciseData = await exerciseService.getExerciseById(id);
-				setExercise(exerciseData);
+				setExercise(exerciseData.data);
 				setError(null);
 			} catch (err) {
 				console.error("❌ Failed to fetch exercise data:", err);
@@ -62,7 +62,7 @@ export default function ExerciseDetails() {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
 					<p>Loading exercise details...</p>
 				</div>
 			</div>
@@ -86,7 +86,7 @@ export default function ExerciseDetails() {
 	}
 
 	const getTypeBadges = (types: string[]) => {
-		const exerciseTypes = !types || types.length === 0 ? ['general'] : types;
+		const exerciseTypes = !types || types.length === 0 ? ["general"] : types;
 		return (
 			<div className="flex flex-wrap gap-2">
 				{exerciseTypes.map((type, index) => (
@@ -139,23 +139,21 @@ export default function ExerciseDetails() {
 								<h3 className="font-semibold text-lg mb-2">{exercise.title}</h3>
 								<p className="text-muted-foreground leading-relaxed">{exercise.description}</p>
 							</div>
-							
+
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Exercise Type</label>
-									<p className="text-sm capitalize">{exercise.exercise_type || 'general'}</p>
+									<span className="text-sm font-medium text-muted-foreground">Exercise Type</span>
+									<p className="text-sm capitalize">{exercise.exercise_type || "general"}</p>
 								</div>
 								<div>
-									<label className="text-sm font-medium text-muted-foreground">Last Updated</label>
+									<span className="text-sm font-medium text-muted-foreground">Last Updated</span>
 									<p className="text-sm">{format(new Date(exercise.updatedAt), "MMM dd, yyyy 'at' HH:mm")}</p>
 								</div>
 							</div>
 
 							<div>
-								<label className="text-sm font-medium text-muted-foreground">Types</label>
-								<div className="mt-2">
-									{getTypeBadges(exercise.type)}
-								</div>
+								<span className="text-sm font-medium text-muted-foreground">Types</span>
+								<div className="mt-2">{getTypeBadges(exercise.type)}</div>
 							</div>
 						</CardContent>
 					</Card>
@@ -181,9 +179,7 @@ export default function ExerciseDetails() {
 										<span className="font-medium">Watch Exercise Video</span>
 									</a>
 								</div>
-								<p className="text-sm text-muted-foreground mt-2">
-									Click to open video in a new tab
-								</p>
+								<p className="text-sm text-muted-foreground mt-2">Click to open video in a new tab</p>
 							</CardContent>
 						</Card>
 					)}
@@ -203,7 +199,7 @@ export default function ExerciseDetails() {
 							<CardContent className="space-y-4">
 								{exercise.primary_muscle.length > 0 && (
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Primary Muscles</label>
+										<span className="text-sm font-medium text-muted-foreground">Primary Muscles</span>
 										<div className="flex flex-wrap gap-1 mt-1">
 											{exercise.primary_muscle.map((muscle, index) => (
 												<Badge key={index} variant="secondary" className="text-xs">
@@ -216,7 +212,7 @@ export default function ExerciseDetails() {
 
 								{exercise.pattern.length > 0 && (
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Movement Patterns</label>
+										<span className="text-sm font-medium text-muted-foreground">Movement Patterns</span>
 										<div className="flex flex-wrap gap-1 mt-1">
 											{exercise.pattern.map((pat, index) => (
 												<Badge key={index} variant="secondary" className="text-xs">
@@ -229,7 +225,7 @@ export default function ExerciseDetails() {
 
 								{exercise.plane.length > 0 && (
 									<div>
-										<label className="text-sm font-medium text-muted-foreground">Movement Planes</label>
+										<span className="text-sm font-medium text-muted-foreground">Movement Planes</span>
 										<div className="flex flex-wrap gap-1 mt-1">
 											{exercise.plane.map((pl, index) => (
 												<Badge key={index} variant="secondary" className="text-xs">

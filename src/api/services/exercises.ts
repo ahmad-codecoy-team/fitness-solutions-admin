@@ -3,6 +3,7 @@ import type {
     Exercise,
     ExerciseCreateRequest, 
     ExerciseUpdateRequest,
+    ExerciseStatusUpdateRequest,
     ExerciseResponse,
     ExercisesListResponse
 } from "@/types/entity";
@@ -81,6 +82,21 @@ const deleteExercise = (exerciseId: string) => {
     });
 };
 
+// Update exercise status (NEW API)
+const updateExerciseStatus = (exerciseId: string, data: ExerciseStatusUpdateRequest) => {
+    console.log("🔵 exerciseService.updateExerciseStatus called, ID:", exerciseId, "Status:", data.status);
+    return apiClient.patch<Exercise>({
+        url: `${ExerciseApi.Base}/${exerciseId}/status`,
+        data,
+    }).then(result => {
+        console.log("✅ updateExerciseStatus result:", result);
+        return result;
+    }).catch(error => {
+        console.error("❌ updateExerciseStatus error:", error);
+        throw error;
+    });
+};
+
 // Legacy bulk import (keeping for backward compatibility)
 const importExercises = (data: ExerciseImportData[]) => {
     return apiClient.post({
@@ -94,6 +110,7 @@ export default {
     getAllExercises,
     getExerciseById,
     updateExercise,
+    updateExerciseStatus,
     deleteExercise,
     importExercises,
 };

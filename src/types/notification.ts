@@ -23,38 +23,45 @@ export interface NotificationTarget {
 }
 
 export interface Notification {
-	id: string;
-	type: NotificationType;
+	_id: string;
 	title: string;
 	message: string;
-	target: NotificationTarget;
-	status: NotificationStatus;
-
-	// Related entities (for auto-generated notifications)
-	relatedStoreId?: string;
-	relatedCollectionId?: string;
-	relatedFlyerId?: string;
-
-	// Scheduling (removed - always send immediately)
-	sentAt?: Date;
-
-	// Metadata
-	createdAt: Date;
-	updatedAt: Date;
-	createdBy: string; // Admin user ID
-
-	// Stats (for sent notifications)
-	totalTargetUsers?: number;
-	deliveredCount?: number;
-	readCount?: number;
+	target: "all" | "users"; // Based on API docs
+	topics: string[];
+	recipients: Array<{
+		_id: string;
+		first_name: string;
+		last_name: string;
+		avatar?: string;
+		email: string;
+		role: {
+			_id: string;
+			name: string;
+			createdAt: string;
+			updatedAt: string;
+		};
+		status: "active" | "inactive";
+	}>;
+	data: {
+		type: string;
+	};
+	deepLink?: string;
+	status: "draft" | "sent" | "scheduled";
+	scheduledAt?: string | null;
+	sentAt?: string | null;
+	createdBy?: string | null;
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
 }
 
-// For creating notifications
+// For creating notifications - updated to match API docs
 export interface CreateNotificationRequest {
-	type: NotificationType;
 	title: string;
 	message: string;
-	target: NotificationTarget;
+	sendToAll?: boolean;
+	recipients?: string[]; // User IDs when sendToAll is false
+	data?: Record<string, any>; // Additional data payload
 }
 
 // For updating notifications (only draft can be updated)

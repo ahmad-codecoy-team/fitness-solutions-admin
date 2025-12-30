@@ -6,64 +6,16 @@ import { Badge } from "@/ui/badge";
 
 import { Card, CardContent } from "@/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
-import { m } from "motion/react";
-import { mockDashboardStats, mockUserActivityData, mockProgramUsageData } from "@/mocks/dashboard";
+import { mockProgramUsageData } from "@/mocks/dashboard";
 import { useState, useMemo } from "react";
-
-interface StatCardProps {
-	title: string;
-	value: string | number;
-	subtitle?: string;
-	icon: string;
-	color: string;
-	badge?: {
-		text: string;
-		variant: "default" | "secondary" | "destructive" | "outline";
-	};
-	index?: number;
-}
-
-const StatCard = ({ title, value, subtitle, icon, color, badge, index }: StatCardProps) => (
-	<m.div
-		initial={{ opacity: 0, y: 30 }}
-		animate={{ opacity: 1, y: 0 }}
-		transition={{
-			duration: 0.6,
-			ease: "easeOut",
-			delay: (index || 0) * 0.1,
-		}}
-		whileHover={{
-			y: -4,
-			transition: { duration: 0.2 },
-		}}
-		className="group"
-	>
-		<Card className="h-full transition-all duration-200 group-hover:shadow-lg">
-			<CardContent className="p-6">
-				<div className="flex items-center justify-between">
-					<div className="flex-1">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-							<Icon icon={icon} style={{ color }} className="shrink-0" />
-							<span>{title}</span>
-							{badge && (
-								<Badge variant={badge.variant} className="text-xs">
-									{badge.text}
-								</Badge>
-							)}
-						</div>
-						<div className="text-2xl font-bold text-foreground">{value}</div>
-						{subtitle && <div className="text-sm text-muted-foreground mt-1">{subtitle}</div>}
-					</div>
-				</div>
-			</CardContent>
-		</Card>
-	</m.div>
-);
+import type { StatCardProps } from "../components/StatCard";
+import StatCard from "../components/StatCard";
+import { useDashboardStats, useUserActivityData } from "@/hooks";
 
 export default function FitnessOverview() {
-	// Use mock data from mocks folder
-	const stats = mockDashboardStats;
-	const userActivityData = mockUserActivityData;
+	// Use React Query hooks for real API data
+	const { data: stats, isLoading: statsLoading } = useDashboardStats();
+	const { data: userActivityData, isLoading: activityLoading } = useUserActivityData();
 
 	// Date range state for program usage filter
 	const [monthsToShow, setMonthsToShow] = useState("3");
@@ -84,47 +36,51 @@ export default function FitnessOverview() {
 		return `Last ${months} months`;
 	}, [monthsToShow]);
 
-	const statCards: StatCardProps[] = [
-		{
-			title: "Total Trainers",
-			value: stats.totalTrainers.toLocaleString(),
-			subtitle: "Registered fitness trainers",
-			icon: "solar:user-bold-duotone",
-			color: "#5942d9",
-		},
-		{
-			title: "Total Trainees",
-			value: stats.totalTrainees.toLocaleString(),
-			subtitle: "Client accounts",
-			icon: "solar:users-group-two-rounded-bold-duotone",
-			color: "#ff6b6b",
-		},
-		{
-			title: "Total Programs",
-			value: stats.totalPrograms,
-			subtitle: "Active fitness programs",
-			icon: "solar:calendar-bold-duotone",
-			color: "#95d9a9",
-		},
-		{
-			title: "Total Exercises",
-			value: stats.totalExercises,
-			subtitle: "Available exercises",
-			icon: "solar:heart-pulse-bold-duotone",
-			color: "#ffb97a",
-		},
-		{
-			title: "Active Users",
-			value: stats.activeUsers,
-			subtitle: `${((stats.activeUsers / stats.totalUsers) * 100).toFixed(1)}% of total`,
-			icon: "solar:check-circle-bold-duotone",
-			color: "#95d9a9",
-			badge: {
-				text: "High",
-				variant: "default",
+	const statCards: StatCardProps[] = useMemo(() => {
+		if (!stats) return [];
+		
+		return [
+			{
+				title: "Total Trainers",
+				value: statsLoading ? "..." : stats.totalTrainers.toLocaleString(),
+				subtitle: "Registered fitness trainers",
+				icon: "solar:user-bold-duotone",
+				color: "#5942d9",
 			},
-		},
-	];
+			{
+				title: "Total Trainees",
+				value: statsLoading ? "..." : stats.totalTrainees.toLocaleString(),
+				subtitle: "Client accounts",
+				icon: "solar:users-group-two-rounded-bold-duotone",
+				color: "#ff6b6b",
+			},
+			{
+				title: "Total Programs",
+				value: statsLoading ? "..." : stats.totalPrograms.toString(),
+				subtitle: "Active fitness programs",
+				icon: "solar:calendar-bold-duotone",
+				color: "#95d9a9",
+			},
+			{
+				title: "Total Exercises",
+				value: statsLoading ? "..." : stats.totalExercises.toString(),
+				subtitle: "Available exercises",
+				icon: "solar:heart-pulse-bold-duotone",
+				color: "#ffb97a",
+			},
+			{
+				title: "Active Users",
+				value: statsLoading ? "..." : stats.activeUsers.toString(),
+				subtitle: statsLoading ? "Loading..." : `${stats.totalUsers > 0 ? ((stats.activeUsers / stats.totalUsers) * 100).toFixed(1) : 0}% of total`,
+				icon: "solar:check-circle-bold-duotone",
+				color: "#95d9a9",
+				badge: !statsLoading && stats.activeUsers > 0 ? {
+					text: "High",
+					variant: "default",
+				} : undefined,
+			},
+		];
+	}, [stats, statsLoading]);
 
 	return (
 		<div className="flex flex-col gap-6 p-6">
@@ -148,12 +104,24 @@ export default function FitnessOverview() {
 							<h3 className="text-lg font-semibold">User Activity</h3>
 						</div>
 						<div className="h-auto flex items-center justify-center">
-							<AnimatedDonutChart
-								title="User Activity Distribution"
-								data={userActivityData}
-								centerValue={stats.totalUsers}
-								centerLabel="Total Users"
-							/>
+							{activityLoading || statsLoading ? (
+								<div className="flex flex-col items-center justify-center py-8">
+									<Icon icon="solar:refresh-bold-duotone" className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
+									<p className="text-sm text-muted-foreground">Loading user activity data...</p>
+								</div>
+							) : userActivityData && stats ? (
+								<AnimatedDonutChart
+									title="User Activity Distribution"
+									data={userActivityData}
+									centerValue={stats.totalUsers}
+									centerLabel="Total Users"
+								/>
+							) : (
+								<div className="flex flex-col items-center justify-center py-8">
+									<Icon icon="solar:danger-circle-bold-duotone" className="h-8 w-8 text-muted-foreground mb-2" />
+									<p className="text-sm text-muted-foreground">No data available</p>
+								</div>
+							)}
 						</div>
 					</CardContent>
 				</Card>

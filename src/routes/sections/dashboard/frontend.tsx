@@ -17,6 +17,7 @@ export const frontendDashboardRoutes: RouteObject[] = [
 		path: "notifications",
 		children: [
 			{ index: true, element: Component("/pages/notifications") },
+			{ path: ":id", element: Component("/pages/notifications/details") },
 			{ path: "create", element: Component("/pages/notifications/create") },
 			{ path: ":id/edit", element: Component("/pages/notifications/edit") },
 		],

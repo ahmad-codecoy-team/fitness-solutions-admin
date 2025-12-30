@@ -11,10 +11,10 @@ const axiosInstance = axios.create({
 	timeout: 50000,
 	headers: {
 		"Content-Type": "application/json;charset=utf-8",
-		"ngrok-skip-browser-warning": "true", // Skip ngrok browser warning page
 	},
 });
 
+// "ngrok-skip-browser-warning": "true",
 axiosInstance.interceptors.request.use(
 	(config) => {
 		// Add request logging for debugging
@@ -36,7 +36,7 @@ axiosInstance.interceptors.request.use(
 		}
 
 		// Ensure ngrok header is always present
-		config.headers["ngrok-skip-browser-warning"] = "true";
+		// config.headers["ngrok-skip-browser-warning"] = "true";
 
 		return config;
 	},
@@ -82,6 +82,8 @@ axiosInstance.interceptors.response.use(
 		// Handle backend response format: { data: {...} } without meta
 		if (res.data.data !== undefined) {
 			console.log("✅ Backend wrapper format detected, extracting data");
+			console.log("🔍 Original response:", res.data);
+			console.log("🔍 Extracted data:", res.data.data);
 			return res.data.data;
 		}
 

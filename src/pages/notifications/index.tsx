@@ -1,47 +1,84 @@
-import { useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { format } from "date-fns";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import notificationService from "@/api/services/notificationService";
+import { Icon } from "@/components/icon";
+import type { Notification } from "@/types/notification";
+import type { CreateNotificationRequest } from "@/types/notification";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
-import { Icon } from "@/components/icon";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
-import { mockNotifications, type Notification } from "@/mocks/notifications";
-import { SimpleNotificationForm } from "./components/simple-notification-form";
-import { NotificationDetailDialog } from "./components/notification-detail-dialog";
-import type { CreateNotificationRequest } from "@/types/notification";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
+import { SimpleNotificationForm } from "./components/simple-notification-form";
 
 export default function NotificationsManagement() {
-	const [notifications] = useState(mockNotifications);
+	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 	const [formKey, setFormKey] = useState(Date.now());
-	const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
-	const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [meta, setMeta] = useState<any>(null);
+
+	// Fetch notifications for history tab
+	const fetchNotifications = async (page = 1) => {
+		console.log("[NotificationPage] Fetching notifications for page:", page);
+		setIsLoadingHistory(true);
+		try {
+			const response = await notificationService.getNotifications(page, 10);
+			console.log("[NotificationPage] Notifications response:", response);
+
+			setNotifications(response.data);
+			setMeta(response.meta);
+			setCurrentPage(response.meta.page);
+			setTotalPages(response.meta.totalPages);
+		} catch (error) {
+			console.error("[NotificationPage] Error fetching notifications:", error);
+			toast.error("Failed to load notification history");
+		} finally {
+			setIsLoadingHistory(false);
+		}
+	};
+
+	// Load notifications when component mounts
+	useEffect(() => {
+		fetchNotifications(1);
+	}, []);
 
 	const handleCreateNotification = async (data: CreateNotificationRequest) => {
+		console.log("[NotificationPage] Form submitted with data:", data);
 		setIsLoading(true);
 
 		try {
-			const announcement = data.message || data.title || "";
-
-			if (!announcement.trim()) {
-				toast.error("Please enter an announcement message");
+			if (!data.title?.trim() || !data.message?.trim()) {
+				toast.error("Please enter both title and message");
 				setIsLoading(false);
 				return;
 			}
 
-			// Mock notification creation
-			await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+			console.log("[NotificationPage] Calling notification service...");
+			// Use the new notification service
+			const { default: notificationService } = await import("@/api/services/notificationService");
+			const result = await notificationService.createAndSendNotification(data);
+			console.log("[NotificationPage] Service call completed successfully:", result);
 
-			toast.success("Announcement sent successfully! All users will receive this notification.");
-			
-			// Clear form
+			toast.success("Push notification sent successfully! Users will receive this notification.");
+
+			// Clear form and refresh history
 			setFormKey(Date.now());
+			fetchNotifications(currentPage);
 		} catch (error) {
-			console.error("Error sending announcement:", error);
-			toast.error("Failed to send announcement. Please try again.");
+			console.error("[NotificationPage] Error sending notification:", error);
+
+			// Enhanced error logging
+			if (error instanceof Error) {
+				console.error("[NotificationPage] Error message:", error.message);
+				console.error("[NotificationPage] Error stack:", error.stack);
+			}
+
+			toast.error("Failed to send notification. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -54,66 +91,47 @@ export default function NotificationsManagement() {
 	};
 
 	const handleViewNotification = (notification: Notification) => {
-		setSelectedNotification(notification);
-		setDetailDialogOpen(true);
+		// Navigate to the details page instead of opening a dialog
+		window.location.href = `/notifications/${notification._id}`;
 	};
 
-	const handleCloseDetail = () => {
-		setDetailDialogOpen(false);
-		setTimeout(() => setSelectedNotification(null), 300);
-	};
+	const handleDeleteNotification = async (notificationId: string) => {
+		if (!window.confirm("Are you sure you want to delete this notification? This action cannot be undone.")) {
+			return;
+		}
 
-	const getTypeIcon = (type: string) => {
-		switch (type) {
-			case 'success': return 'solar:check-circle-bold-duotone';
-			case 'warning': return 'solar:warning-bold-duotone';
-			case 'error': return 'solar:close-circle-bold-duotone';
-			case 'info': 
-			default: return 'solar:info-circle-bold-duotone';
+		try {
+			console.log("[NotificationPage] Deleting notification:", notificationId);
+			await notificationService.deleteNotification(notificationId);
+
+			toast.success("Notification deleted successfully");
+
+			// Refresh the notifications list
+			fetchNotifications(currentPage);
+		} catch (error) {
+			console.error("[NotificationPage] Error deleting notification:", error);
+			toast.error("Failed to delete notification. Please try again.");
 		}
 	};
 
-	const getTypeColor = (type: string) => {
-		switch (type) {
-			case 'success': return 'default';
-			case 'warning': return 'secondary';
-			case 'error': return 'destructive';
-			case 'info':
-			default: return 'outline';
-		}
-	};
-
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'sent': return 'default';
-			case 'scheduled': return 'secondary';
-			case 'draft': return 'outline';
-			default: return 'outline';
-		}
-	};
-
-	const getRecipientsBadge = (recipients: string, count: number) => {
+	const getRecipientsBadge = (notification: Notification) => {
 		const colors: Record<string, string> = {
-			all: 'bg-blue-100 text-blue-800',
-			trainers: 'bg-green-100 text-green-800',
-			trainees: 'bg-purple-100 text-purple-800',
-			individual: 'bg-gray-100 text-gray-800'
+			all: "bg-blue-100 text-blue-800",
+			users: "bg-green-100 text-green-800",
 		};
 
+		const isAll = notification.target === "all";
+		const count = isAll ? "All Users" : notification.recipients.length;
+
 		return (
-			<Badge variant="outline" className={colors[recipients] || colors.individual}>
-				{recipients === 'all' ? 'All Users' : recipients === 'individual' ? 'Individual' : `${recipients.charAt(0).toUpperCase() + recipients.slice(1)}`} ({count})
+			<Badge variant="outline" className={colors[notification.target] || colors.users}>
+				{isAll ? "All Users" : `${count} User${notification.recipients.length !== 1 ? "s" : ""}`}
 			</Badge>
 		);
 	};
 
-	// Stats
-	const totalNotifications = notifications.length;
-	const sentNotifications = notifications.filter(n => n.status === 'sent').length;
-	const scheduledNotifications = notifications.filter(n => n.status === 'scheduled').length;
-	const draftNotifications = notifications.filter(n => n.status === 'draft').length;
-	const totalReads = notifications.reduce((sum, n) => sum + n.readCount, 0);
-	const totalClicks = notifications.reduce((sum, n) => sum + n.clickCount, 0);
+	// Stats based on real data
+	const totalNotifications = meta?.total || 0;
 
 	return (
 		<div className="flex flex-col gap-6 p-6">
@@ -127,7 +145,6 @@ export default function NotificationsManagement() {
 					<p className="text-muted-foreground">Manage and send notifications to users</p>
 				</div>
 			</div>
-
 
 			{/* Tabs */}
 			<Tabs defaultValue="send" className="w-full">
@@ -148,11 +165,9 @@ export default function NotificationsManagement() {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<Icon icon="solar:notification-unread-bold-duotone" className="h-5 w-5 text-primary" />
-								Send Announcement
+								Send Push Notification
 							</CardTitle>
-							<p className="text-sm text-muted-foreground">
-								Create and send push notifications to all app users
-							</p>
+							<p className="text-sm text-muted-foreground">Create and send push notifications to app users</p>
 						</CardHeader>
 						<CardContent>
 							<div className="max-w-2xl">
@@ -173,81 +188,131 @@ export default function NotificationsManagement() {
 					<Card>
 						<CardHeader>
 							<CardTitle>Notification History</CardTitle>
+							<p className="text-sm text-muted-foreground">
+								{totalNotifications > 0 && `Total: ${totalNotifications} notifications`}
+							</p>
 						</CardHeader>
 						<CardContent>
-							<Table>
-								<TableHeader>
-									<TableRow>
-										<TableHead>Notification</TableHead>
-										<TableHead>Recipients</TableHead>
-										<TableHead>Date</TableHead>
-										<TableHead>Actions</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{notifications.map((notification) => (
-										<TableRow key={notification.id} className="hover:bg-muted/50">
-											<TableCell>
-  <button
-    type="button"
-    onClick={() => handleViewNotification(notification)}
-    className="text-left hover:underline focus:outline-none w-full"
-  >
-    <div className="font-medium text-primary cursor-pointer">{notification.title}</div>
-    <div className="text-sm text-muted-foreground truncate max-w-md">
-      {notification.message}
-    </div>
-  </button>
-</TableCell>
-										
-											<TableCell>
-												{getRecipientsBadge(notification.recipients, notification.recipientCount)}
-											</TableCell>
-											
-											<TableCell>
-												<div className="text-sm">
-													<div>
-														{notification.sentAt 
-															? format(new Date(notification.sentAt), 'MMM dd, yyyy')
-															: notification.scheduledAt
-															? format(new Date(notification.scheduledAt), 'MMM dd, yyyy')
-															: format(new Date(notification.createdAt), 'MMM dd, yyyy')
-														}
-													</div>
-													<div className="text-muted-foreground">
-														{notification.sentAt 
-															? format(new Date(notification.sentAt), 'HH:mm')
-															: notification.scheduledAt
-															? `Scheduled ${format(new Date(notification.scheduledAt), 'HH:mm')}`
-															: 'Draft'
-														}
-													</div>
-												</div>
-											</TableCell>
-											<TableCell>
-												<Button 
-  variant="ghost" 
-  size="sm"
-  onClick={() => handleViewNotification(notification)}
->
-  <Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
-</Button>
-											</TableCell>
+							{isLoadingHistory ? (
+								<div className="flex items-center justify-center py-8">
+									<Icon icon="solar:loading-bold" className="h-6 w-6 animate-spin mr-2" />
+									<span>Loading notifications...</span>
+								</div>
+							) : (
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead>Notification</TableHead>
+											<TableHead>Recipients</TableHead>
+											<TableHead>Date</TableHead>
+											<TableHead>Actions</TableHead>
 										</TableRow>
-									))}
-								</TableBody>
-							</Table>
+									</TableHeader>
+									<TableBody>
+										{notifications.length === 0 ? (
+											<TableRow>
+												<TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+													No notifications found
+												</TableCell>
+											</TableRow>
+										) : (
+											notifications.map((notification) => (
+												<TableRow key={notification._id} className="hover:bg-muted/50">
+													<TableCell>
+														<button
+															type="button"
+															onClick={() => handleViewNotification(notification)}
+															className="text-left hover:underline focus:outline-none w-full"
+														>
+															<div className="font-medium text-primary cursor-pointer">{notification.title}</div>
+															<div className="text-sm text-muted-foreground truncate max-w-md">
+																{notification.message}
+															</div>
+														</button>
+													</TableCell>
+
+													<TableCell>{getRecipientsBadge(notification)}</TableCell>
+
+													<TableCell>
+														<div className="text-sm">
+															<div>
+																{notification.sentAt
+																	? format(new Date(notification.sentAt), "MMM dd, yyyy")
+																	: notification.scheduledAt
+																		? format(new Date(notification.scheduledAt), "MMM dd, yyyy")
+																		: format(new Date(notification.createdAt), "MMM dd, yyyy")}
+															</div>
+															<div className="text-muted-foreground">
+																{notification.sentAt
+																	? format(new Date(notification.sentAt), "HH:mm")
+																	: notification.scheduledAt
+																		? `Scheduled ${format(new Date(notification.scheduledAt), "HH:mm")}`
+																		: "Draft"}
+															</div>
+														</div>
+													</TableCell>
+													<TableCell>
+														<div className="flex items-center gap-1">
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() => handleViewNotification(notification)}
+																title="View Details"
+															>
+																<Icon icon="solar:eye-bold-duotone" className="h-4 w-4" />
+															</Button>
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() => handleDeleteNotification(notification._id)}
+																title="Delete Notification"
+																className="text-destructive hover:text-destructive"
+															>
+																<Icon icon="solar:trash-bin-minimalistic-bold-duotone" className="h-4 w-4" />
+															</Button>
+														</div>
+													</TableCell>
+												</TableRow>
+											))
+										)}
+									</TableBody>
+								</Table>
+							)}
+
+							{/* Pagination Controls */}
+							{!isLoadingHistory && totalPages > 1 && (
+								<div className="flex items-center justify-between mt-4">
+									<div className="text-sm text-muted-foreground">
+										Page {currentPage} of {totalPages}
+									</div>
+									<div className="flex items-center gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => fetchNotifications(currentPage - 1)}
+											disabled={currentPage === 1 || isLoadingHistory}
+										>
+											<Icon icon="solar:alt-arrow-left-bold" className="h-4 w-4" />
+											Previous
+										</Button>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => fetchNotifications(currentPage + 1)}
+											disabled={currentPage === totalPages || isLoadingHistory}
+										>
+											Next
+											<Icon icon="solar:alt-arrow-right-bold" className="h-4 w-4" />
+										</Button>
+									</div>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</TabsContent>
 			</Tabs>
 
-			{/* Notification Detail Dialog */}
-			<NotificationDetailDialog
-				notification={selectedNotification}
-				open={detailDialogOpen}
-				onClose={handleCloseDetail}
-			/>
+			{/* Note: Notification details now handled by separate page */}
 		</div>
 	);
 }

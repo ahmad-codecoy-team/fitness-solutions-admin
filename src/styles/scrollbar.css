@@ -1,0 +1,59 @@
+/* Custom scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none; /* WebKit browsers */
+}
+
+/* Show custom scrollbar on hover/scroll */
+.custom-scrollbar:hover {
+  scrollbar-width: thin; /* Firefox */
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar {
+  display: block;
+  width: 8px; /* WebKit browsers */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(
+    156,
+    163,
+    175,
+    0.5
+  ); /* Tailwind gray-400 with opacity */
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(
+    107,
+    114,
+    128,
+    0.7
+  ); /* Tailwind gray-500 with opacity */
+}
+
+/* Dark mode support */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.5); /* Tailwind gray-600 with opacity */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(55, 65, 81, 0.7); /* Tailwind gray-700 with opacity */
+}
+
+/* For containers that need scrolling */
+.scrollable-container {
+  overflow-y: auto;
+  max-height: 300px;
+}

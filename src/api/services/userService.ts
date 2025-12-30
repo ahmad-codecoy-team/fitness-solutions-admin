@@ -39,6 +39,7 @@ export enum UserApi {
 	AdminBase = "/admin",
 	Trainers = "/admin/trainers",
 	Clients = "/admin/clients",
+	TotalClients = "/client/get_total_client",
 	UserStatus = "/admin/users",
 	ToggleStatus = "/user/toggle/status/:id", // Legacy endpoint
 }
@@ -95,6 +96,19 @@ const getClientById = (clientId: string) =>
 		url: `${UserApi.Clients}/${clientId}`,
 	});
 
+const getTotalClients = () => {
+	console.log("🔵 userService.getTotalClients called, URL:", UserApi.TotalClients);
+	return apiClient.get<Client[]>({
+		url: UserApi.TotalClients,
+	}).then(result => {
+		console.log("✅ getTotalClients result:", result);
+		return result;
+	}).catch(error => {
+		console.error("❌ getTotalClients error:", error);
+		throw error;
+	});
+};
+
 // User status management
 const updateUserStatus = (userId: string, data: UserStatusUpdateRequest) =>
 	apiClient.patch<UserStatusUpdateResponse>({
@@ -123,6 +137,7 @@ export default {
 	
 	// Admin - Clients
 	getClientById,
+	getTotalClients,
 	
 	// User Management
 	updateUserStatus,

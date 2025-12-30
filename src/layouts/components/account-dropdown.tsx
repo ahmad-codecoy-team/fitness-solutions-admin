@@ -32,23 +32,25 @@ export default function AccountDropdown() {
 		}
 	};
 
+	//  src={avatar || avatarDefault}
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="ghost" size="icon" className="rounded-full">
-					<img className="h-6 w-6 rounded-full" src={avatar || avatarDefault} alt="" />
+					<img className="h-6 w-6 rounded-full" src={avatarDefault} alt="" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56">
 				<div className="flex items-center gap-2 p-2">
-					<img className="h-10 w-10 rounded-full" src={avatar || avatarDefault} alt="" />
+					<img className="h-10 w-10 rounded-full" src={avatarDefault} alt="" />
 					<div className="flex flex-col items-start">
 						<div className="text-text-primary text-sm font-medium">{username}</div>
 						<div className="text-text-secondary text-xs">{email}</div>
 					</div>
 				</div>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem className="font-bold text-warning" onClick={logout}>
+				<DropdownMenuItem className="font-bold text-primary" onClick={logout}>
 					{t("sys.login.logout")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>

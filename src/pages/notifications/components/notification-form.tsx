@@ -1,7 +1,7 @@
 import { Icon } from "@/components/icon";
 
-// Temporary placeholder for mock users - should be replaced with real API call
-const MOCK_USERS: any[] = [];
+// This component is deprecated - use simple-notification-form.tsx instead
+// No mock users needed as we use the simple form with real data
 import type { Notification } from "@/types/notification";
 import { NOTIFICATION_TARGET_TYPE_LABELS, NotificationTargetType, NotificationType } from "@/types/notification";
 import { Button } from "@/ui/button";
@@ -114,14 +114,8 @@ export function NotificationForm({ notification, onSubmit, onCancel, isLoading, 
 		}
 	};
 
-	// Filter users based on search term
-	const filteredUsers = MOCK_USERS.filter(
-		(user) =>
-			user.firstName.toLowerCase().includes(formData.searchTerm.toLowerCase()) ||
-			user.lastName.toLowerCase().includes(formData.searchTerm.toLowerCase()) ||
-			`${user.firstName} ${user.lastName}`.toLowerCase().includes(formData.searchTerm.toLowerCase()) ||
-			user.email.toLowerCase().includes(formData.searchTerm.toLowerCase()),
-	);
+	// No users to filter as this component is deprecated
+	const filteredUsers: any[] = [];
 
 	return (
 		<div className="w-full max-w-none">

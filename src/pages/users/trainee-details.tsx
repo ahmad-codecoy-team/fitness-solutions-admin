@@ -129,7 +129,7 @@ export default function TraineeDetails() {
 					<CardContent className="space-y-6">
 						<div className="flex items-start gap-4">
 							<Avatar className="h-20 w-20">
-								<img src={getImageUrl(client.avatar)} alt={client.name || "Client"} className="object-cover" />
+								<img src={getImageUrl(client.avatar)} alt={client.first_name || "Client"} className="object-cover" />
 							</Avatar>
 							<div className="flex-1">
 								<div className="flex items-center gap-3 mb-2">
@@ -197,27 +197,6 @@ export default function TraineeDetails() {
 										<Icon icon="solar:eye-bold-duotone" className="h-4 w-4 mr-2" />
 										View Trainer
 									</Button>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				)}
-
-				{/* Current Program */}
-				{client.currentProgram && (
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Icon icon="solar:clipboard-list-bold-duotone" />
-								Current Program
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="flex items-center gap-3">
-								<Icon icon="solar:dumbbell-small-bold-duotone" className="h-10 w-10 text-primary" />
-								<div>
-									<h3 className="font-semibold">{client.currentProgram}</h3>
-									<p className="text-sm text-muted-foreground">Active fitness program</p>
 								</div>
 							</div>
 						</CardContent>

@@ -116,6 +116,9 @@ export type MenuTree = Menu & {
 	children?: MenuTree[];
 };
 
+// Exercise status types
+export type ExerciseStatus = 'pending' | 'approved' | 'rejected';
+
 // Exercise types based on API documentation
 export interface Exercise {
 	_id: string;
@@ -129,6 +132,7 @@ export interface Exercise {
 	plane: string[];
 	photo: string;
 	exercise_type: string;
+	status: ExerciseStatus;
 	createdAt: string;
 	updatedAt: string;
 	__v: number;
@@ -146,6 +150,10 @@ export interface ExerciseUpdateRequest {
 	description?: string;
 	video_link?: string;
 	type?: string | string[];
+}
+
+export interface ExerciseStatusUpdateRequest {
+	status: ExerciseStatus;
 }
 
 export interface ExerciseResponse {
@@ -187,9 +195,10 @@ export interface Client {
 	_id: string;
 	first_name: string;
 	last_name: string;
+	avatar: string;
 	dob: string | null;
 	email: string;
-	trainer: string | Trainer;
+	trainer: Trainer;
 	phone: string;
 	gender: "male" | "female" | "other";
 	start_weight: number;

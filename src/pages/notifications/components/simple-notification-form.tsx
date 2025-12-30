@@ -1,15 +1,16 @@
+import userService from "@/api/services/userService";
 import { Icon } from "@/components/icon";
+import type { Trainer } from "@/types/entity";
 import type { CreateNotificationRequest } from "@/types/notification";
+import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Checkbox } from "@/ui/checkbox";
+import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Textarea } from "@/ui/textarea";
-import { Input } from "@/ui/input";
-import { Checkbox } from "@/ui/checkbox";
-import { Badge } from "@/ui/badge";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { mockTrainers, mockTrainees } from "@/mocks/users";
 
 interface SimpleNotificationFormProps {
 	onSubmit: (data: CreateNotificationRequest) => Promise<void>;
@@ -19,44 +20,60 @@ interface SimpleNotificationFormProps {
 }
 
 export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: SimpleNotificationFormProps) {
-	const [announcement, setAnnouncement] = useState("");
+	const [title, setTitle] = useState("");
+	const [message, setMessage] = useState("");
+	const [sendToAll, setSendToAll] = useState(true);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [trainers, setTrainers] = useState<Trainer[]>([]);
+	const [isLoadingTrainers, setIsLoadingTrainers] = useState(true);
 
-	// Combine all users (trainers + trainees)
-	const allUsers = useMemo(() => {
-		const trainers = mockTrainers.map(t => ({
-			id: t.id,
-			name: t.name,
-			email: t.email,
-			type: "Trainer" as const,
-			status: t.status
-		}));
-		const trainees = mockTrainees.map(t => ({
-			id: t.id,
-			name: t.name,
-			email: t.email,
-			type: "Trainee" as const,
-			status: t.status
-		}));
-		return [...trainers, ...trainees];
+	// Fetch trainers on component mount
+	useEffect(() => {
+		const fetchTrainers = async () => {
+			try {
+				console.log("[SimpleNotificationForm] Fetching trainers...");
+				setIsLoadingTrainers(true);
+				const result = await userService.getAllTrainers();
+				console.log("[SimpleNotificationForm] Fetched trainers:", result);
+				setTrainers(result.data);
+			} catch (error) {
+				console.error("[SimpleNotificationForm] Error fetching trainers:", error);
+				toast.error("Failed to load trainers. Please refresh the page.");
+			} finally {
+				setIsLoadingTrainers(false);
+			}
+		};
+
+		fetchTrainers();
 	}, []);
+
+	// Map trainers to the format expected by the UI (only trainers, no trainees)
+	const allUsers = useMemo(() => {
+		return trainers.map((trainer) => ({
+			id: trainer._id,
+			name: `${trainer.first_name} ${trainer.last_name}`,
+			email: trainer.email,
+			type: "Trainer" as const,
+			status: trainer.status === "active" ? ("active" as const) : ("inactive" as const),
+			avatar: trainer.avatar,
+		}));
+	}, [trainers]);
 
 	// Filter users based on search query
 	const filteredUsers = useMemo(() => {
 		if (!searchQuery.trim()) return allUsers;
 		const query = searchQuery.toLowerCase();
-		return allUsers.filter(user => 
-			user.name.toLowerCase().includes(query) ||
-			user.email.toLowerCase().includes(query)
+		return allUsers.filter(
+			(user) => user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query),
 		);
 	}, [allUsers, searchQuery]);
 
 	// Handle select all
 	const handleSelectAll = (checked: boolean) => {
 		if (checked) {
-			setSelectedUserIds(filteredUsers.map(u => u.id));
+			setSelectedUserIds(filteredUsers.map((u) => u.id));
 		} else {
 			setSelectedUserIds([]);
 		}
@@ -65,29 +82,33 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 	// Handle individual user selection
 	const handleUserToggle = (userId: string, checked: boolean) => {
 		if (checked) {
-			setSelectedUserIds(prev => [...prev, userId]);
+			setSelectedUserIds((prev) => [...prev, userId]);
 		} else {
-			setSelectedUserIds(prev => prev.filter(id => id !== userId));
+			setSelectedUserIds((prev) => prev.filter((id) => id !== userId));
 		}
 	};
 
 	const validateForm = () => {
 		const newErrors: Record<string, string> = {};
 
-		if (!announcement.trim()) {
-			newErrors.announcement = "Announcement message is required";
+		if (!title.trim()) {
+			newErrors.title = "Title is required";
 		}
 
-		if (announcement.trim().length < 10) {
-			newErrors.announcement = "Announcement must be at least 10 characters long";
+		if (!message.trim()) {
+			newErrors.message = "Message is required";
 		}
 
-		if (announcement.trim().length > 500) {
-			newErrors.announcement = "Announcement must be less than 500 characters";
+		if (message.trim().length < 10) {
+			newErrors.message = "Message must be at least 10 characters long";
 		}
 
-		if (selectedUserIds.length === 0) {
-			newErrors.recipients = "Please select at least one user";
+		if (message.trim().length > 500) {
+			newErrors.message = "Message must be less than 500 characters";
+		}
+
+		if (!sendToAll && selectedUserIds.length === 0) {
+			newErrors.recipients = "Please select at least one trainer";
 		}
 
 		setErrors(newErrors);
@@ -104,19 +125,17 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 
 		try {
 			const submitData: CreateNotificationRequest = {
-				type: "admin_message" as any,
-				title: "Admin Announcement",
-				message: announcement.trim(),
-				target: {
-					type: "custom_users" as any,
-					userIds: selectedUserIds,
-				},
+				title: title.trim(),
+				message: message.trim(),
+				sendToAll: sendToAll,
+				...(!sendToAll && { recipients: selectedUserIds }),
+				data: { type: "ADMIN_MESSAGE" },
 			};
 
 			await onSubmit(submitData);
 		} catch (error) {
-			console.error("Error submitting announcement:", error);
-			toast.error("Failed to send announcement");
+			console.error("Error submitting notification:", error);
+			toast.error("Failed to send notification");
 		}
 	};
 
@@ -128,53 +147,88 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-xl font-semibold">
-						{mode === "create" ? "Create New Announcement" : "Edit Announcement"}
+						{mode === "create" ? "Send Push Notification" : "Edit Notification"}
 					</CardTitle>
-					<p className="text-muted-foreground">
-						Send a push notification announcement to app users
-					</p>
+					<p className="text-muted-foreground">Send a push notification to app users</p>
 				</CardHeader>
 				<CardContent className="space-y-6">
-					{/* Announcement Message */}
+					{/* Title */}
 					<div className="space-y-2">
-						<Label htmlFor="announcement" className="text-foreground">
-							Announcement Message *
+						<Label htmlFor="title" className="text-foreground">
+							Title *
 						</Label>
-						<Textarea
-							id="announcement"
-							value={announcement}
+						<Input
+							id="title"
+							value={title}
 							onChange={(e) => {
-								setAnnouncement(e.target.value);
-								if (errors.announcement) {
-									setErrors((prev) => ({ ...prev, announcement: "" }));
+								setTitle(e.target.value);
+								if (errors.title) {
+									setErrors((prev) => ({ ...prev, title: "" }));
 								}
 							}}
-							placeholder="Enter your announcement message here..."
-							rows={5}
-							className={errors.announcement ? "border-destructive" : ""}
+							placeholder="Enter notification title..."
+							className={errors.title ? "border-destructive" : ""}
 						/>
-						{errors.announcement && (
-							<p className="text-sm text-destructive">{errors.announcement}</p>
-						)}
-						<p className="text-xs text-muted-foreground">
-							{announcement.length}/500 characters
-						</p>
+						{errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
 					</div>
 
-					{/* User Selection */}
+					{/* Message */}
+					<div className="space-y-2">
+						<Label htmlFor="message" className="text-foreground">
+							Message *
+						</Label>
+						<Textarea
+							id="message"
+							value={message}
+							onChange={(e) => {
+								setMessage(e.target.value);
+								if (errors.message) {
+									setErrors((prev) => ({ ...prev, message: "" }));
+								}
+							}}
+							placeholder="Enter your notification message here..."
+							rows={4}
+							className={errors.message ? "border-destructive" : ""}
+						/>
+						{errors.message && <p className="text-sm text-destructive">{errors.message}</p>}
+						<p className="text-xs text-muted-foreground">{message.length}/500 characters</p>
+					</div>
+
+					{/* Send To All Option */}
 					<div className="space-y-4">
-						<Label className="text-foreground">Select Users *</Label>
-						
-						{/* User Selection List - Always visible */}
+						<Label className="text-foreground">Recipients</Label>
+						<div className="flex items-center space-x-2">
+							<Checkbox
+								id="sendToAll"
+								checked={sendToAll}
+								onCheckedChange={(checked) => {
+									setSendToAll(checked as boolean);
+									if (checked) {
+										setSelectedUserIds([]);
+									}
+								}}
+							/>
+							<Label htmlFor="sendToAll" className="cursor-pointer">
+								Send to all trainers
+							</Label>
+						</div>
+					</div>
+
+					{/* Trainer Selection - Only show when not sending to all */}
+					{!sendToAll && (
+						<div className="space-y-4">
+							<Label className="text-foreground">Select Trainers *</Label>
+
+							{/* User Selection List */}
 							<div className="space-y-3">
 								{/* Search */}
 								<div className="relative">
-									<Icon 
-										icon="solar:magnifer-bold-duotone" 
+									<Icon
+										icon="solar:magnifer-bold-duotone"
 										className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
 									/>
 									<Input
-										placeholder="Search users by name or email..."
+										placeholder="Search trainers by name or email..."
 										value={searchQuery}
 										onChange={(e) => setSearchQuery(e.target.value)}
 										className="pl-9"
@@ -184,26 +238,28 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 								{/* Select All */}
 								<div className="flex items-center justify-between p-3 bg-muted rounded-lg">
 									<div className="flex items-center space-x-2">
-										<Checkbox
-											id="select-all"
-											checked={isAllSelected}
-											onCheckedChange={handleSelectAll}
-										/>
+										<Checkbox id="select-all" checked={isAllSelected} onCheckedChange={handleSelectAll} />
 										<Label htmlFor="select-all" className="font-medium cursor-pointer">
 											Select All
 										</Label>
 									</div>
-									<Badge variant="secondary">
-										{selectedCount} selected
-									</Badge>
+									<Badge variant="secondary">{selectedCount} selected</Badge>
 								</div>
 
 								{/* User List */}
 								<div className="border rounded-lg max-h-[300px] overflow-y-auto">
-									{filteredUsers.length === 0 ? (
+									{isLoadingTrainers ? (
 										<div className="p-8 text-center text-muted-foreground">
-											<Icon icon="solar:users-group-rounded-bold-duotone" className="h-12 w-12 mx-auto mb-2 opacity-50" />
-											<p>No users found</p>
+											<Icon icon="solar:loading-bold" className="h-12 w-12 mx-auto mb-2 opacity-50 animate-spin" />
+											<p>Loading trainers...</p>
+										</div>
+									) : filteredUsers.length === 0 ? (
+										<div className="p-8 text-center text-muted-foreground">
+											<Icon
+												icon="solar:users-group-rounded-bold-duotone"
+												className="h-12 w-12 mx-auto mb-2 opacity-50"
+											/>
+											<p>No trainers found</p>
 										</div>
 									) : (
 										<div className="divide-y">
@@ -217,10 +273,7 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 														checked={selectedUserIds.includes(user.id)}
 														onCheckedChange={(checked) => handleUserToggle(user.id, checked as boolean)}
 													/>
-													<Label
-														htmlFor={user.id}
-														className="flex-1 cursor-pointer"
-													>
+													<Label htmlFor={user.id} className="flex-1 cursor-pointer">
 														<div className="flex items-center justify-between">
 															<div>
 																<p className="font-medium">{user.name}</p>
@@ -244,27 +297,24 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 									)}
 								</div>
 
-								{errors.recipients && (
-									<p className="text-sm text-destructive">{errors.recipients}</p>
-								)}
+								{errors.recipients && <p className="text-sm text-destructive">{errors.recipients}</p>}
 							</div>
-					</div>
+						</div>
+					)}
 
 					{/* Info Box */}
 					<div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
 						<div className="flex items-start space-x-3">
-							<Icon 
-								icon="solar:info-circle-bold" 
-								className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" 
-							/>
+							<Icon icon="solar:info-circle-bold" className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
 							<div className="space-y-1">
-								<p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-									Announcement Details
-								</p>
+								<p className="text-sm font-medium text-blue-900 dark:text-blue-100">Notification Details</p>
 								<ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-									<li>• This will be sent to {selectedCount} selected user{selectedCount !== 1 ? 's' : ''}</li>
-									<li>• Selected users will receive a push notification</li>
-									<li>• The announcement will be visible in the app</li>
+									<li>
+										• This will be sent to{" "}
+										{sendToAll ? "all trainers" : `${selectedCount} selected trainer${selectedCount !== 1 ? "s" : ""}`}
+									</li>
+									<li>• Trainers will receive a push notification</li>
+									<li>• The notification will be visible in the app</li>
 								</ul>
 							</div>
 						</div>
@@ -272,19 +322,10 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 
 					{/* Action Buttons */}
 					<div className="flex items-center justify-end gap-3 pt-4 border-t">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onCancel}
-							disabled={isLoading}
-						>
+						<Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
 							Cancel
 						</Button>
-						<Button
-							type="submit"
-							disabled={isLoading || !announcement.trim()}
-							className="min-w-[120px]"
-						>
+						<Button type="submit" disabled={isLoading || !title.trim() || !message.trim()} className="min-w-[120px]">
 							{isLoading ? (
 								<>
 									<Icon icon="solar:loading-bold" className="h-4 w-4 mr-2 animate-spin" />
@@ -293,7 +334,7 @@ export function SimpleNotificationForm({ onSubmit, onCancel, isLoading, mode }: 
 							) : (
 								<>
 									<Icon icon="solar:paper-plane-bold" className="h-4 w-4 mr-2" />
-									Send Announcement
+									Send Notification
 								</>
 							)}
 						</Button>

@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import userService from "@/api/services/userService";
 import exerciseService from "@/api/services/exercises";
+import userService from "@/api/services/userService";
 import type { DashboardStats, UserActivityData } from "@/mocks/dashboard";
+import { useQuery } from "@tanstack/react-query";
 
 // Query keys
 export const dashboardKeys = {
@@ -42,7 +42,7 @@ export function useDashboardStats() {
 				// Process exercises data
 				let exercises: any[] = [];
 				let totalExercises = 0;
-				if (exercisesData && exercisesData.data && Array.isArray(exercisesData.data)) {
+				if (exercisesData?.data && Array.isArray(exercisesData.data)) {
 					exercises = exercisesData.data;
 					totalExercises = exercisesData.meta?.total || exercises.length;
 				} else if (Array.isArray(exercisesData)) {

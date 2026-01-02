@@ -1,1 +1,2 @@
-/*    /index.html   200
+/api/*  http://68.178.168.53/fitness-backend/api/v1/:splat  200
+/*      /index.html                                         200
